@@ -5,7 +5,6 @@ hr {
 
 .hr-sect {
 	display: flex;
-  /* justify-content: flex-end; */
 	flex-basis: 100%;
 	align-items: center;
 	margin: 2px 0px;

@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import './dragdrop.css';
-import App from './App';
 import {Tree, DragTree} from './tree';
 import * as serviceWorker from './serviceWorker';
 
@@ -20,7 +19,6 @@ var t=<DragTree conclusion="Z" premises={[tB,tX]} />;
 ReactDOM.render(
     <div>
     {t}
-    <App />
     </div>
     , document.getElementById('root'));
 
