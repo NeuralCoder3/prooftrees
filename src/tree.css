@@ -1,0 +1,27 @@
+hr {
+  margin: auto 5px;
+  border: 1.5px solid rgb(150, 150, 150);
+}
+
+.hr-sect {
+	display: flex;
+  /* justify-content: flex-end; */
+	flex-basis: 100%;
+	align-items: center;
+	margin: 2px 0px;
+    font-size: 10px;
+    cursor: move;
+}
+.hr-sect::before{
+	content: "";
+	flex-grow: 1;
+	background: rgba(0, 0, 0, 1.00);
+	height: 2px;
+	font-size: 0px;
+	line-height: 0px;
+	margin: 0px 4px;
+}
+.hr-sect::after {
+	content: "";
+	flex-grow: 0;
+}
