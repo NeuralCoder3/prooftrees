@@ -2,31 +2,67 @@ import React from 'react';
 import './tree.css';
 
 import { v4 as uuidv4 } from 'uuid';
+// import { MathComponent } from 'mathjax-react'
 
 // https://www.npmjs.com/package/react-draggable
 import Draggable from 'react-draggable';
+import MathJax from 'react-mathjax';
 
-interface treeProp {
-  assumption: bool;
-  premises: Tree[];
-  conclusion: string;
-  prototype: bool;
+function trim (s, c) {
+  if (c === "]") c = "\\]";
+  if (c === "^") c = "\\^";
+  if (c === "\\") c = "\\\\";
+  return s.replace(new RegExp(
+    "^[" + c + "]+|[" + c + "]+$", "g"
+  ), "");
 }
 
-interface treeState extends treeProp {
-  width: number;
-  height: number;
+function makeMath(s) {
+    return <MathJax.Provider>
+            <MathJax.Node inline formula={s} />
+        </MathJax.Provider>;
 }
 
-class Tree extends React.Component<treeProp,treeState> {
+function wrapMath(s) {
+    s=s.trim();
+    if(s.startsWith("$"))
+        return makeMath(trim(s,"$"));
+    else 
+        return s;
+}
+
+
+// interface treeProp {
+//   assumption: bool;
+//   premises: Tree[];
+//   conclusion: string;
+//   prototype: bool;
+// }
+
+// interface treeState extends treeProp {
+//   width: number;
+//   height: number;
+// }
+
+// Axiom handled by premises
+export const ruleTypes = {
+	ASSUMPTION: "Assumption",
+	HOLE: "Hole",
+	RULE: "Rule",
+}
+
+class Tree extends React.Component {
+    // <treeProp,treeState> {
 
     constructor(props) {
         super(props);
         var defaultProps = {
-            assumption: false,
+            type: ruleTypes.RULE,
             premises: [],
             conclusion: "Dummy",
-            prototype: false
+            ruleName: "Text",
+            prototype: false,
+            // math: false,
         };
         this.state={};
         for(var p in defaultProps){
@@ -43,6 +79,12 @@ class Tree extends React.Component<treeProp,treeState> {
             ...this.state
         };
         this.containerDiv = React.createRef();
+        this.state.conclusion=wrapMath(this.state.conclusion);
+        this.state.ruleName=wrapMath(this.state.ruleName);
+    }
+
+    getPremises() {
+        return this.state.premises;
     }
 
 
@@ -63,24 +105,39 @@ class Tree extends React.Component<treeProp,treeState> {
 
 
     render() {
+        // var premisesCode = this.state.premises;
         var premisesCode = [];
         for (var i = 0; i < this.state.premises.length; i++) {
-            premisesCode.push(this.state.premises[i]);
-            // last block for rule name
-            premisesCode.push(<hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />);
+            var t = this.state.premises[i];
+            // t.ref=React.createRef();
+            premisesCode.push(t);
+            // if(!t.getState)
+                // console.log(t);
+            if(t.props.premises && t.props.premises.length>0)
+                premisesCode.push(<hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />);
         }
 
         var premisesWidth=Math.max(this.state.width,100);
         return (
         <div style={{display:"inline-block"}} ref={this.containerDiv}>
             <center>{ premisesCode }</center>
-            {this.state.assumption ? <div /> : 
+            {this.state.type===ruleTypes.RULE ? 
                 <div id={this.state.uuid} className="hr-sect" style={{width: premisesWidth+"px"}}>
-                    Text
-                </div>}
-            <center>{this.state.conclusion}</center>
+                    {this.state.ruleName}
+                </div> : <div /> }
+            <center>
+            {this.state.conclusion}
+                <hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />
+            </center>
         </div>
         );
+            // {
+            //     this.state.math ?
+            //         <MathJax.Provider>
+            //             <MathJax.Node inline formula={this.state.conclusion} />
+            //         </MathJax.Provider>
+            //         : this.state.conclusion
+            // }
     }
 }
 

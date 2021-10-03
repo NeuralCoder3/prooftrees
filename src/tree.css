@@ -24,3 +24,7 @@ hr {
 	content: "";
 	flex-grow: 0;
 }
+/* mjx-container[jax="SVG"][display="true"] {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+} */
