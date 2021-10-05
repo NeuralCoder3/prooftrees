@@ -28,7 +28,7 @@ function wrapMath(s) {
     if(s.startsWith("$"))
         return makeMath(trim(s,"$"));
     else 
-        return s;
+        return s.length>0 ? s : "&nbsp;";
 }
 
 
@@ -62,6 +62,7 @@ class Tree extends React.Component {
             conclusion: "Dummy",
             ruleName: "Text",
             prototype: false,
+            parent: undefined,
             // math: false,
         };
         this.state={};
@@ -81,6 +82,14 @@ class Tree extends React.Component {
         this.containerDiv = React.createRef();
         this.state.conclusion=wrapMath(this.state.conclusion);
         this.state.ruleName=wrapMath(this.state.ruleName);
+        // console.log(this.state.conclusion+": "+this.state.premises.length);
+        for(var ttR of this.state.premises) {
+            var [t,] = ttR;
+            t.state.conclusion="Test";
+            // console.log("Set parent of "+t.state.conclusion+" to "+this.state.conclusion);
+            // console.log(t);
+            t.state.parent=this;
+        }
     }
 
     getPremises() {
@@ -108,12 +117,13 @@ class Tree extends React.Component {
         // var premisesCode = this.state.premises;
         var premisesCode = [];
         for (var i = 0; i < this.state.premises.length; i++) {
-            var t = this.state.premises[i];
+            var [t,tR] = this.state.premises[i];
             // t.ref=React.createRef();
-            premisesCode.push(t);
+            premisesCode.push(tR);
             // if(!t.getState)
                 // console.log(t);
-            if(t.props.premises && t.props.premises.length>0)
+            // if(t.props.premises && t.props.premises.length>0)
+            if(t && t.state.premises.length>0)
                 premisesCode.push(<hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />);
         }
 
@@ -126,7 +136,9 @@ class Tree extends React.Component {
                     {this.state.ruleName}
                 </div> : <div /> }
             <center>
-            {this.state.conclusion}
+            <div style={{display: "inline-block"}} className={this.state.type===ruleTypes.HOLE ? "dropzone" : ""} id={this.state.type===ruleTypes.ASSUMPTION ? this.state.uuid : "conclusion"}>
+                {this.state.conclusion}
+            </div>
                 <hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />
             </center>
         </div>
@@ -159,6 +171,13 @@ class DragTree extends Tree {
         x: data.x,
         y: data.y,
         }));
+        // var [t,] = this.state.premises[0];
+        console.log(this.state);
+        if(this.state.parent && data.x*data.x+data.y*data.y>=100*100) {
+            console.log("Detach");
+            // console.log(window.findReactComponent(t));
+            // console.log(window.FindReact(t));
+        }
     }
 
     render() {

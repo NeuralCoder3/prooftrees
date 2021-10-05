@@ -28,3 +28,14 @@ hr {
     margin-top: 0px !important;
     margin-bottom: 0px !important;
 } */
+
+
+.dropzone {
+  background-color: #bfe4ff;
+  border: dashed 3px #aaa;
+  border-radius: 3px;
+  /* margin: 10px auto 30px; */
+  padding: 3px;
+  /* width: 80%; */
+  transition: background-color 0.3s;
+}
