@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import './dragdrop.css';
-import {DragTree, ruleTypes} from './tree';
+import {Tree,DragTree, ruleTypes} from './tree';
 import * as serviceWorker from './serviceWorker';
 
 
@@ -124,23 +124,23 @@ import * as serviceWorker from './serviceWorker';
 
 // create element with <DragTree >  (for rendering)
 // store ref => at rendering create component instance   (for field and state access)
-ReactDOM.render(
-    <div>
-    <div id="rootContent"></div>
-    <div id="dummy"></div>
-    </div>
-    , document.getElementById('root'));
+// ReactDOM.render(
+//     <div>
+//     <div id="rootContent"></div>
+//     <div id="dummy"></div>
+//     </div>
+//     , document.getElementById('root'));
 
-var tAR=<DragTree conclusion="A" type={ruleTypes.ASSUMPTION} />;
-// var tA = ReactDOM.render(tAR,document.getElementById("dummy"));
-// var dummy=document.createElement("div")
-var tA = ReactDOM.render(tAR,document.createElement("div"));
-var tBR=<DragTree conclusion="X" premises={[[tA,tAR]]} />;
-var tB = ReactDOM.render(tBR,document.createElement("div"));
-var tXR=<DragTree conclusion="X -> Z" />;
-var tX = ReactDOM.render(tXR,document.createElement("div"));
-var tR=<DragTree  conclusion="Z" premises={[[tB,tBR],[tX,tXR]]} />;
-var t  = ReactDOM.render(tR ,document.createElement("div"));
+// var tAR=<DragTree conclusion="A" type={ruleTypes.ASSUMPTION} />;
+// // var tA = ReactDOM.render(tAR,document.getElementById("dummy"));
+// // var dummy=document.createElement("div")
+// var tA = ReactDOM.render(tAR,document.createElement("div"));
+// var tBR=<DragTree conclusion="X" premises={[[tA,tAR]]} />;
+// var tB = ReactDOM.render(tBR,document.createElement("div"));
+// var tXR=<DragTree conclusion="X -> Z" />;
+// var tX = ReactDOM.render(tXR,document.createElement("div"));
+// var tR=<DragTree  conclusion="Z" premises={[[tB,tBR],[tX,tXR]]} />;
+// var t  = ReactDOM.render(tR ,document.createElement("div"));
 
 // Problem: render twice => are the instances correct?
 
@@ -151,11 +151,18 @@ var t  = ReactDOM.render(tR ,document.createElement("div"));
 // var tR=<DragTree  ref={el => t  = el} conclusion="Z" premises={[[tB,tBR],[tX,tXR]]} />;
 
 
+var tA=new Tree({conclusion:"A",type:ruleTypes.ASSUMPTION});
+var tB=new Tree({conclusion:"X",premises:[tA]});
+var tX=new Tree({conclusion:"X -> Z"});
+var t =new Tree({conclusion:"Z",premises:[tB,tX]});
+
+
 ReactDOM.render(
     <div>
-    {tR}
+    {t.treeComp}
     </div>
-    , document.getElementById('rootContent'));
+    , document.getElementById('root'));
+    // , document.getElementById('rootContent'));
 
     // console.log(tA,tAR);
     // console.log(tX,tXR);

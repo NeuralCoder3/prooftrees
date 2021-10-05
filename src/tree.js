@@ -32,17 +32,6 @@ function wrapMath(s) {
 }
 
 
-// interface treeProp {
-//   assumption: bool;
-//   premises: Tree[];
-//   conclusion: string;
-//   prototype: bool;
-// }
-
-// interface treeState extends treeProp {
-//   width: number;
-//   height: number;
-// }
 
 // Axiom handled by premises
 export const ruleTypes = {
@@ -51,51 +40,48 @@ export const ruleTypes = {
 	RULE: "Rule",
 }
 
-class Tree extends React.Component {
-    // <treeProp,treeState> {
-
-    constructor(props) {
-        super(props);
-        var defaultProps = {
+class Tree {
+    constructor(options={}) {
+        Object.assign(this,{
             type: ruleTypes.RULE,
             premises: [],
             conclusion: "Dummy",
             ruleName: "Text",
             prototype: false,
             parent: undefined,
-            // math: false,
-        };
-        this.state={};
-        for(var p in defaultProps){
-            if(!props[p]){
-                this.state[p]=defaultProps[p];
-            }else{
-                this.state[p]=props[p];
-            }
+            treeComp: undefined,
+            uuid: "UUID-"+uuidv4(),
+        },options);
+        this.treeComp=<DragTree tree={this} />;
+        this.conclusion=wrapMath(this.conclusion);
+        this.ruleName=wrapMath(this.ruleName);
+        // for(var [t,] of this.state.premises) {
+        //     t.state.conclusion="Test";
+        //     // console.log("Set parent of "+t.state.conclusion+" to "+this.state.conclusion);
+        //     // console.log(t);
+        //     t.state.parent=this;
+        // }
+    }
+}
+
+class TreeComp extends React.Component {
+    // <treeProp,treeState> {
+
+    constructor(props) {
+        super(props);
+        // probs should contain a tree
+        // console.log("Create TreeComp with ",props);
+        if(!props.tree){
+            console.log("ill-formed treeComp construction")
+            // add new hole tree => not accessible => Problem
         }
         this.state = {
             width: 0,
             height: 0,
-            uuid: "UUID-"+uuidv4(),
-            ...this.state
         };
         this.containerDiv = React.createRef();
-        this.state.conclusion=wrapMath(this.state.conclusion);
-        this.state.ruleName=wrapMath(this.state.ruleName);
         // console.log(this.state.conclusion+": "+this.state.premises.length);
-        for(var ttR of this.state.premises) {
-            var [t,] = ttR;
-            t.state.conclusion="Test";
-            // console.log("Set parent of "+t.state.conclusion+" to "+this.state.conclusion);
-            // console.log(t);
-            t.state.parent=this;
-        }
     }
-
-    getPremises() {
-        return this.state.premises;
-    }
-
 
     componentDidMount() {
         this.adjustSize();
@@ -116,14 +102,15 @@ class Tree extends React.Component {
     render() {
         // var premisesCode = this.state.premises;
         var premisesCode = [];
-        for (var i = 0; i < this.state.premises.length; i++) {
-            var [t,tR] = this.state.premises[i];
+        let premises = this.props.tree.premises;
+        for (var i = 0; i < premises.length; i++) {
+            var t = premises[i];
             // t.ref=React.createRef();
-            premisesCode.push(tR);
+            premisesCode.push(t.treeComp);
             // if(!t.getState)
                 // console.log(t);
             // if(t.props.premises && t.props.premises.length>0)
-            if(t && t.state.premises.length>0)
+            if(t && t.premises.length>0)
                 premisesCode.push(<hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />);
         }
 
@@ -131,13 +118,13 @@ class Tree extends React.Component {
         return (
         <div style={{display:"inline-block"}} ref={this.containerDiv}>
             <center>{ premisesCode }</center>
-            {this.state.type===ruleTypes.RULE ? 
-                <div id={this.state.uuid} className="hr-sect" style={{width: premisesWidth+"px"}}>
-                    {this.state.ruleName}
+            {this.props.tree.type===ruleTypes.RULE ? 
+                <div id={this.props.tree.uuid} className="hr-sect" style={{width: premisesWidth+"px"}}>
+                    {this.props.tree.ruleName}
                 </div> : <div /> }
             <center>
-            <div style={{display: "inline-block"}} className={this.state.type===ruleTypes.HOLE ? "dropzone" : ""} id={this.state.type===ruleTypes.ASSUMPTION ? this.state.uuid : "conclusion"}>
-                {this.state.conclusion}
+            <div style={{display: "inline-block"}} className={this.props.tree.type===ruleTypes.HOLE ? "dropzone" : ""} id={this.props.tree.type===ruleTypes.ASSUMPTION ? this.props.tree.uuid : "conclusion"}>
+                {this.props.tree.conclusion}
             </div>
                 <hr style={{display:"inline-block",margin:"0 10px",border:"0px"}} />
             </center>
@@ -156,7 +143,7 @@ class Tree extends React.Component {
 
 
 
-class DragTree extends Tree {
+class DragTree extends TreeComp {
     constructor(props) {
         super(props);
         this.state = {
@@ -172,8 +159,8 @@ class DragTree extends Tree {
         y: data.y,
         }));
         // var [t,] = this.state.premises[0];
-        console.log(this.state);
-        if(this.state.parent && data.x*data.x+data.y*data.y>=100*100) {
+        console.log(this.props.tree);
+        if(this.props.tree.parent && data.x*data.x+data.y*data.y>=100*100) {
             console.log("Detach");
             // console.log(window.findReactComponent(t));
             // console.log(window.FindReact(t));
@@ -184,7 +171,7 @@ class DragTree extends Tree {
         var sPos=(e,data) => this.setPos(e,data);
   return (<Draggable 
     onStop={(e,data) => sPos(e,data)}
-    handle={"#"+this.state.uuid}
+    handle={"#"+this.props.tree.uuid}
   >
       {super.render()}
   </Draggable>);
@@ -192,4 +179,4 @@ class DragTree extends Tree {
 }
 
 
-export {Tree, DragTree};
+export {TreeComp, Tree, DragTree};
