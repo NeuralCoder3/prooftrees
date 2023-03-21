@@ -6,7 +6,7 @@ export const calculus: inf_calculus = [
   convertStringRule({
     name: "TVar",
     conclusion: "typed(?Gamma, ?x, ?k)",
-    premises: ["is_var(?x)", "maps(?Gamma, ?x, ?k)"]
+    premises: ["maps(?Gamma, ?x, ?k)", "is_var(?x)"]
   }),
   convertStringRule({
     name: "TConst",
@@ -69,4 +69,5 @@ export const app_renderer: AppDispatchRenderer<string> = {
 
 export const const_renderer: ConstDispatchRenderer<string> = {
   "Plus": "+",
+  "Minus": "-",
 };

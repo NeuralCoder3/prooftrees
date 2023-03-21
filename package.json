@@ -25,6 +25,5 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "unify": "^0.9.10"
   }
 }
