@@ -1,52 +1,63 @@
 import * as inference_rules from '../lib/inference_rules';
+import * as logic from '../lib/logic/syntactic_logic';
 
-export const calculus : inference_rules.calculus = [
+// https://www.overleaf.com/read/csfvyggxptqr
+
+const blue = logic.mkConst("Blue");
+const red = logic.mkConst("Red");
+const yellow = logic.mkConst("Yellow");
+const green = logic.mkConst("Green");
+const orange = logic.mkConst("Orange");
+const purple = logic.mkConst("Purple");
+const brown = logic.mkConst("Brown");
+
+export const calculus: inference_rules.calculus = [
   // Axioms = primary colors
   {
     name: "Blue",
-    conclusion: "Blue",
+    conclusion: blue,
     premises: [],
   },
   {
     name: "Red",
-    conclusion: "Red",
+    conclusion: red,
     premises: [],
   },
   {
     name: "Yellow",
-    conclusion: "Yellow",
+    conclusion: yellow,
     premises: [],
   },
   // Secondary colors
   {
     name: "Green1",
-    conclusion: "Green",
-    premises: ["Blue", "Yellow"],
+    conclusion: green,
+    premises: [blue, yellow],
   },
   {
     name: "Green2",
-    conclusion: "Green",
-    premises: ["Yellow", "Blue"],
+    conclusion: green,
+    premises: [yellow, blue],
   },
   {
     name: "Orange",
-    conclusion: "Orange",
-    premises: ["Red", "Yellow"],
+    conclusion: orange,
+    premises: [red, yellow],
   },
   {
     name: "Purple",
-    conclusion: "Purple",
-    premises: ["Red", "Blue"],
+    conclusion: purple,
+    premises: [red, blue],
   },
   // Tertiary colors
   {
     name: "Brown1",
-    conclusion: "Brown",
-    premises: ["Red", "Green"],
+    conclusion: brown,
+    premises: [red, green],
   },
   {
     name: "Brown2",
-    conclusion: "Brown",
-    premises: ["Purple", "Orange"],
+    conclusion: brown,
+    premises: [purple, orange],
   }
 ];

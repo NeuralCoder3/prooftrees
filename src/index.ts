@@ -1,37 +1,41 @@
 // const greeting = getGreeting("John");
 // console.log(greeting);
 
+import { calculus as type_conv_rules, renderer as type_conv_app_renderer } from "./calculi/type_conversion";
+import { calculus as color_rules } from "./calculi/color";
+import { calculus as type_calculus, app_renderer as type_app_renderer, const_renderer as type_const_renderer } from "./calculi/static_semantics_expr";
 
-//import unify.js
-var unify = require('unify');
-var variable = unify.variable;
-//create some data structures to be unified
-var rectangle1 = {
-    location:[25, 35],
-    size:[100, variable("height")],
-    color:"#000000"
-};
-var rectangle2 = {
-    location:variable("location"),
-    size:[100, 100],
-    color:"#000000"
-};
-//box the objects so they can be unified
-var boxedRect1 = unify.box(rectangle1);
-var boxedRect2 = unify.box(rectangle2);
-//preform the unification
-var result = boxedRect1.unify(boxedRect2);
-//check if unification succeeded and print the results
-if(result) {
-  //print "rectangle1 height: 100" to the console
-  console.log("rectangle1  height: " + 
-    boxedRect1.get("height").toString());
-  //print "rectangle2 location: [25, 35]" to the console
-  console.log("rectangle2 location: [" + 
-    boxedRect2.get("location")[0] + ", " +
-    boxedRect2.get("location")[1]  + "]");
+import { ruleToString, calculus } from "./lib/inference_rules";
+import { parse } from "./lib/logic/parser";
+import { DispatchRenderer, LiteralStringRenderer, StringDispatchRenderer } from "./lib/logic/renderer";
+
+console.log("Color rules:");
+
+const color_renderer = new LiteralStringRenderer();
+for (const rule of color_rules) {
+  console.log(ruleToString(rule, color_renderer));
+  console.log();
 }
-else {
-  console.log('Unification Failed!');
+
+console.log();
+console.log();
+console.log("Type conversion rules:");
+console.log();
+
+const type_conv_renderer = new StringDispatchRenderer().registerAppDispatcher(type_conv_app_renderer);
+for (const rule of type_conv_rules) {
+  console.log(ruleToString(rule, type_conv_renderer));
+  console.log();
+}
+
+console.log();
+console.log();
+console.log("Static typing rules:");
+console.log();
+
+const type_renderer = new StringDispatchRenderer().registerAppDispatcher(type_app_renderer).registerConstDispatcher(type_const_renderer);
+for (const rule of type_calculus) {
+  console.log(ruleToString(rule, type_renderer));
+  console.log();
 }
 
