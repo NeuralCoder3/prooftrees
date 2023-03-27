@@ -1,9 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
-import { parse } from "./logic/parser";
 import { applyRule, applyRuleFull, convertStringRule, ruleByName } from "./inference_rules";
 import { calculus as type_conv_calculus } from "../calculi/type_conversion";
 import { calculus as color_calculus } from "../calculi/color";
 import { calculus as expr_type_calculus, app_renderer as expr_type_app_renderer, const_renderer as expr_type_const_renderer } from "../calculi/static_semantics_expr";
+import { parse } from "../syntax/parser";
 
 describe("colorCalculus", () => {
   it("blueAxiom", () => {

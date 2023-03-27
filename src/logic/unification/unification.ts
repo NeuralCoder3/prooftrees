@@ -1,5 +1,5 @@
-import { Renderer } from "./logic/renderer";
-import { Expr, Var, equalExpr, getVars } from "./logic/syntactic_logic";
+import { Renderer } from "react-dom";
+import { Expr, getVars, equalExpr, Var } from "../syntax/syntactic_logic";
 
 export type Subst = { [key: string]: Expr };
 

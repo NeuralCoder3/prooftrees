@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
-import { mkApp, mkConst, mkVar } from "./syntactic_logic";
 import { parseOption, parse } from "./parser";
+import { mkConst, mkVar, mkApp } from "./syntactic_logic";
 
 describe("parseResult", () => {
   it("Const", () => {

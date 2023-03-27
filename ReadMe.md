@@ -1,11 +1,14 @@
-# Unification Inference
+
+
+
+## Unification Inference
 
 In this repository, we explore the idea that inference proofs (and such FOL) can be expressed/reduced as a unification problems. 
 
 We present rules in an abstract way as a combination of a conclusion and a set of premises. 
 The unification happens between the goal that should be proven using an inference proof derivation and the conclusion of the rule resulting in new premises.
 
-## Usage
+### Usage
 
 The needed packages can be installed using `npm install`.
 
@@ -13,7 +16,7 @@ To run the example provided in `index.ts` use `npm start`.
 
 The tests can be run using `npm test`.
 
-## Overview
+### Overview
 
 This code is a quick exploration in a generalized unification approach to inference.
 The following features are currently implemented:
@@ -26,7 +29,7 @@ The following features are currently implemented:
 - handling of unification results including variable instantiation
 - some sample calculi (fully supported: type conversion, static semantics (expression, statement, program), hoare logic)
 
-### Files
+#### Files
 
 We give a short guidance through the code.
 
@@ -52,7 +55,7 @@ Lastly, we test our approach on some calculi in the `calculi` folder.
 - static_semantics_stmt: typing rules for statements and programs in a subset of C
 - hoare: a calculus for Hoare logic
 
-### Tests
+#### Tests
 
 We just provide some unit tests that inspect a happy-path execution and some edge cases.
 The tests are not complete and do not provide strong guarantees.
@@ -60,7 +63,7 @@ They demonstrate the usage of functions and make sure a minimal functionality is
 
 Tests are implemented using jest and are placed grouped by files in `[file].test.ts`.
 
-## Theory
+### Theory
 
 Unification is tightly connected to the idea of inference, logic, and reasoning.
 Applying inference rules is a form of unification where the student matches the goal with the conclusion of the rule to derive new premises. In some cases, additional free variables have to be instantiated using creativity or remaining proof steps.

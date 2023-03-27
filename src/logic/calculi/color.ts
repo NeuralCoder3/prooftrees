@@ -1,5 +1,5 @@
-import * as inference_rules from '../lib/inference_rules';
-import * as logic from '../lib/logic/syntactic_logic';
+import * as inference_rules from '../inference/inference_rules';
+import * as logic from '../syntax/syntactic_logic';
 
 // https://www.overleaf.com/read/csfvyggxptqr
 

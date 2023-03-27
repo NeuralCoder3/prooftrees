@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { Subst, unify } from "./unification";
-import { parse } from "./logic/parser";
+import { parse } from "../syntax/parser";
 
 function unifyString(s1: string, s2: string): Subst | null {
   const e1 = parse(s1);

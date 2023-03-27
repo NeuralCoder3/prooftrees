@@ -1,5 +1,5 @@
-import { calculus as inf_calculus, convertStringRule } from '../lib/inference_rules';
-import { AppDispatchRenderer, ConstDispatchRenderer } from '../lib/logic/renderer';
+import { calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
+import { AppDispatchRenderer, ConstDispatchRenderer } from '../syntax/renderer';
 import { renderer as type_app_renderer } from './type_conversion';
 
 export const calculus: inf_calculus = [

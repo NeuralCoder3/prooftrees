@@ -1,8 +1,8 @@
-import * as logic from './logic/syntactic_logic';
-import { parse } from './logic/parser';
-import { Subst, applySubst, unify } from './unification';
+import { parse } from '../syntax/parser';
+import { Renderer } from '../syntax/renderer';
+import * as logic from '../syntax/syntactic_logic';
+import { Subst, applySubst, unify } from '../unification/unification';
 import assert from 'assert';
-import { Renderer } from './logic/renderer';
 
 export interface InferenceRule {
   conclusion: logic.Expr;

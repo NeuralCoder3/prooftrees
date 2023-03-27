@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Subst } from "../unification";
+import { Subst } from "../unification/unification";
 
 // recursive closed type
 // μ X. (1×S) + (2×X×L X) + (3×S)
