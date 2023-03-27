@@ -51,6 +51,33 @@ export function getVars(e: Expr): Set<string> {
   }
 }
 
+export interface ConstantSymbols {
+  arity: number;
+  name: string;
+}
+
+export function getConstantSymbols(e: Expr): Set<ConstantSymbols> {
+  switch (e.kind) {
+    case "const":
+      return new Set([{ arity: 0, name: e.value }]);
+    case "app":
+      const arg_symbols = e.args.map(getConstantSymbols).reduce(
+        (acc, s) => new Set([...acc, ...s]),
+        new Set()
+      );
+      if (e.callee.kind === "const") {
+        return new Set([
+          ...arg_symbols,
+          { arity: e.args.length, name: e.callee.value }
+        ]);
+      } else {
+        return new Set([...arg_symbols, ...getConstantSymbols(e.callee)]);
+      }
+    case "var":
+      return new Set();
+  }
+}
+
 export function equalExpr(e1: Expr, e2: Expr): boolean {
   if (e1.kind !== e2.kind) {
     return false;

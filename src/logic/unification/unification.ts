@@ -1,4 +1,4 @@
-import { Renderer } from "react-dom";
+import { Renderer } from "../syntax/renderer";
 import { Expr, getVars, equalExpr, Var } from "../syntax/syntactic_logic";
 
 export type Subst = { [key: string]: Expr };
