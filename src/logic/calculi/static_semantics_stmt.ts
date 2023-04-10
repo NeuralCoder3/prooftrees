@@ -1,66 +1,69 @@
 import { calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
 import { AppDispatchRenderer, ConstDispatchRenderer, renderNestedList } from '../syntax/renderer';
 
-export const calculus: inf_calculus = [
-  convertStringRule({
-    name: "TAssign",
-    conclusion: "stmt_typed(?Gamma, Assign(?l, ?e))",
-    premises: [
-      "typed(?Gamma, ?e, ?k1)",
-      "typed(?Gamma, ?l, ?k2)",
-      "convertible(?k1, ?k2)",
-      "is_scalar(?k1)",
-      "is_scalar(?k2)",
-    ]
-  }),
-  convertStringRule({
-    name: "TAbort",
-    conclusion: "stmt_typed(?Gamma, Abort)",
-    premises: [
-    ]
-  }),
-  convertStringRule({
-    name: "TIf",
-    conclusion: "stmt_typed(?Gamma, If(?e, ?s1, ?s2))",
-    premises: [
-      "typed(?Gamma, ?e, ?k)",
-      "stmt_typed(?Gamma, ?s1)",
-      "stmt_typed(?Gamma, ?s2)",
-      "is_scalar(?k)",
-    ]
-  }),
-  convertStringRule({
-    name: "TWhile",
-    conclusion: "stmt_typed(?Gamma, While(?e, ?s))",
-    premises: [
-      "typed(?Gamma, ?e, ?k)",
-      "stmt_typed(?Gamma, ?s)",
-      "is_scalar(?k)",
-    ]
-  }),
-  // Program rules
-  convertStringRule({
-    name: "TBlock",
-    conclusion: "stmt_typed(?Gamma, Block(?p))",
-    premises: [
-      "prg_typed(?Gamma, ?p)",
-    ]
-  }),
-  convertStringRule({
-    name: "TSeq",
-    conclusion: "prg_typed(?Gamma, Seq(?s, ?p))",
-    premises: [
-      "stmt_typed(?Gamma, ?s)",
-      "prg_typed(?Gamma, ?p)",
-    ]
-  }),
-  convertStringRule({
-    name: "TTerm",
-    conclusion: "prg_typed(?Gamma, epsilon)",
-    premises: [
-    ]
-  }),
-];
+export const calculus: inf_calculus = {
+  name: "StmtStaticSemantics",
+  rules: [
+    convertStringRule({
+      name: "TAssign",
+      conclusion: "stmt_typed(?Gamma, Assign(?l, ?e))",
+      premises: [
+        "typed(?Gamma, ?e, ?k1)",
+        "typed(?Gamma, ?l, ?k2)",
+        "convertible(?k1, ?k2)",
+        "is_scalar(?k1)",
+        "is_scalar(?k2)",
+      ]
+    }),
+    convertStringRule({
+      name: "TAbort",
+      conclusion: "stmt_typed(?Gamma, Abort)",
+      premises: [
+      ]
+    }),
+    convertStringRule({
+      name: "TIf",
+      conclusion: "stmt_typed(?Gamma, If(?e, ?s1, ?s2))",
+      premises: [
+        "typed(?Gamma, ?e, ?k)",
+        "stmt_typed(?Gamma, ?s1)",
+        "stmt_typed(?Gamma, ?s2)",
+        "is_scalar(?k)",
+      ]
+    }),
+    convertStringRule({
+      name: "TWhile",
+      conclusion: "stmt_typed(?Gamma, While(?e, ?s))",
+      premises: [
+        "typed(?Gamma, ?e, ?k)",
+        "stmt_typed(?Gamma, ?s)",
+        "is_scalar(?k)",
+      ]
+    }),
+    // Program rules
+    convertStringRule({
+      name: "TBlock",
+      conclusion: "stmt_typed(?Gamma, Block(?p))",
+      premises: [
+        "prg_typed(?Gamma, ?p)",
+      ]
+    }),
+    convertStringRule({
+      name: "TSeq",
+      conclusion: "prg_typed(?Gamma, Seq(?s, ?p))",
+      premises: [
+        "stmt_typed(?Gamma, ?s)",
+        "prg_typed(?Gamma, ?p)",
+      ]
+    }),
+    convertStringRule({
+      name: "TTerm",
+      conclusion: "prg_typed(?Gamma, epsilon)",
+      premises: [
+      ]
+    }),
+  ]
+};
 
 // couple with stmt renderer and convertible renderer
 export const app_renderer: AppDispatchRenderer<string> = {

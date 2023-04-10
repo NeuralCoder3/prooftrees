@@ -1,8 +1,8 @@
+import assert from 'assert';
 import { parse } from '../syntax/parser';
 import { Renderer } from '../syntax/renderer';
 import * as logic from '../syntax/syntactic_logic';
 import { Subst, applySubst, unify } from '../unification/unification';
-import assert from 'assert';
 
 export interface InferenceRule {
   conclusion: logic.Expr;
@@ -24,7 +24,28 @@ export function convertStringRule(rule: StringRule): InferenceRule {
   };
 }
 
-export type calculus = InferenceRule[];
+export interface calculus {
+  rules: InferenceRule[];
+  name: string;
+  // renderers?: Renderer;
+};
+
+export function combineCalculus(calculi: calculus[], new_name: string | null = null, rename_rules = false): calculus {
+  return {
+    name: new_name || calculi.map(c => c.name).join(' + '),
+    rules: calculi.map(c => {
+      if (rename_rules) {
+        return c.rules.map(r => ({ ...r, name: `${c.name}::${r.name}` }));
+      } else {
+        return c.rules;
+      }
+    }).reduce((acc, x) => [...acc, ...x], []),
+  };
+}
+
+export function mkCalculus(name: string, rules: InferenceRule[]): calculus {
+  return { name, rules };
+}
 
 export function premiseVariables(rule: InferenceRule): Set<string> {
   return rule.premises
@@ -86,7 +107,7 @@ export function applyRule(
 }
 
 export function ruleByName(calculus: calculus, name: string): InferenceRule | null {
-  for (const rule of calculus) {
+  for (const rule of calculus.rules) {
     if (rule.name === name) {
       return rule;
     }
@@ -101,4 +122,23 @@ export function ruleToString(rule: InferenceRule, renderer: Renderer<string>): s
   const length = Math.max(Math.max(...premises.map(premise => premise.length)), conclusion.length);
   const name = rule.name ? rule.name : '';
   return premises.join('\n') + '\n' + '-'.repeat(length) + ' ' + name + '\n' + conclusion;
+}
+
+
+function rootFunctionName(expr: logic.Expr): string | null {
+  if (expr.kind === "app" && expr.callee.kind === "const") {
+    return expr.callee.value;
+  }
+  return null;
+}
+
+export function associatedFunctions(calc: calculus): string[] {
+  const result = [];
+  for (const rule of calc.rules) {
+    const root = rootFunctionName(rule.conclusion);
+    if (root !== null) {
+      result.push(root);
+    }
+  }
+  return [...new Set(result)];
 }
