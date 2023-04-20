@@ -101,3 +101,11 @@ hr {
 .small_spacer {
   width: 20px;
 }
+
+.error {
+  background-color: rgba(255, 72, 26, 0.4);
+}
+
+.finished {
+  background-color: rgba(0, 255, 0, 0.4);
+}

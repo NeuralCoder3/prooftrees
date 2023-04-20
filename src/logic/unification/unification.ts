@@ -77,3 +77,4 @@ export function applySubst(mgu: Subst, e: Expr): Expr {
 export function renderSubst(subst: Subst, renderer: Renderer<string>): string {
   return "[" + Object.keys(subst).map(k => `?${k} -> ${renderer.render(subst[k])}`).join(", ") + "]";
 }
+

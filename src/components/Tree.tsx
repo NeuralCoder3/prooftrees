@@ -1,15 +1,19 @@
 import { calculus, ruleByName, applyRuleFull } from "../logic/inference/inference_rules";
+import { parse } from "../logic/syntax/parser";
 import { StringDispatchRenderer } from "../logic/syntax/renderer";
 import { Expr, getVars } from "../logic/syntax/syntactic_logic";
-import { Subst } from "../logic/unification/unification";
+import { Subst, applySubst } from "../logic/unification/unification";
 
-export interface Tree {
-  conclusion: string;
-  assumptions: Tree[];
+export interface GenericTree<T> {
+  conclusion: T;
+  assumptions: GenericTree<T>[];
   rule?: string;
 };
 
-export function goal_tree(conclusion: string): Tree {
+export type Tree = GenericTree<Expr>;
+export type StringTree = GenericTree<string>;
+
+export function goal_tree(conclusion: Expr): Tree {
   return {
     conclusion: conclusion,
     assumptions: [],
@@ -38,4 +42,41 @@ export function applyNamedRule(calc: calculus, name: string, goal: Expr): [Expr[
     }
   }
   return [premises, goal_subst];
+}
+
+export function applyTreeSubst(tree: Tree, subst: Subst): Tree {
+  return {
+    conclusion: applySubst(subst, tree.conclusion),
+    assumptions: tree.assumptions.map(a => applyTreeSubst(a, subst)),
+    rule: tree.rule,
+  };
+}
+
+// deep copy of tree
+export function copyTree(tree: Tree): Tree {
+  return {
+    conclusion: tree.conclusion,
+    assumptions: tree.assumptions.map(a => copyTree(a)),
+    rule: tree.rule,
+  };
+}
+
+export function isClosed(tree: Tree): boolean {
+  return tree.rule !== undefined && tree.assumptions.every(a => isClosed(a));
+}
+
+export function stringTreeToTree(tree: StringTree): Tree {
+  return {
+    conclusion: parse(tree.conclusion),
+    assumptions: tree.assumptions.map(a => stringTreeToTree(a)),
+    rule: tree.rule,
+  };
+}
+
+export function treeToStringTree(tree: Tree): StringTree {
+  return {
+    conclusion: debugRenderer.render(tree.conclusion),
+    assumptions: tree.assumptions.map(a => treeToStringTree(a)),
+    rule: tree.rule,
+  };
 }
