@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/prooftrees/static/css/main.3948b18f.css",
+    "main.js": "/prooftrees/static/js/main.a341d621.js",
+    "static/js/787.a29ceb5c.chunk.js": "/prooftrees/static/js/787.a29ceb5c.chunk.js",
+    "index.html": "/prooftrees/index.html",
+    "main.3948b18f.css.map": "/prooftrees/static/css/main.3948b18f.css.map",
+    "main.a341d621.js.map": "/prooftrees/static/js/main.a341d621.js.map",
+    "787.a29ceb5c.chunk.js.map": "/prooftrees/static/js/787.a29ceb5c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3948b18f.css",
+    "static/js/main.a341d621.js"
+  ]
+}
