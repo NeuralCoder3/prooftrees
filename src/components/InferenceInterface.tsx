@@ -9,14 +9,14 @@ import { StringDispatchRenderer } from '../logic/syntax/renderer';
 import React, { useContext } from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
-const calculus = color.calculus;
-const renderer = new StringDispatchRenderer();
-const goal = "Brown";
+// const calculus = color.calculus;
+// const renderer = new StringDispatchRenderer();
+// const goal = "Brown";
 
-// const calculus = expr_ty.calculus;
-// const type_renderer = new StringDispatchRenderer()
-//   .registerAppDispatcher(expr_ty.app_renderer).registerConstDispatcher(expr_ty.const_renderer);
-// const goal = "typed(Γ, BinOp(Minus, BinOp(Plus,Indir(x),y), 1), ?type)";
+const calculus = expr_ty.calculus;
+const renderer = new StringDispatchRenderer()
+  .registerAppDispatcher(expr_ty.app_renderer).registerConstDispatcher(expr_ty.const_renderer);
+const goal = "typed(Γ, BinOp(Minus, BinOp(Plus,Indir(x),y), 1), ?type)";
 
 export function InferenceInterface() {
 
