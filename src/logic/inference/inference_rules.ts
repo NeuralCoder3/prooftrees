@@ -93,7 +93,7 @@ export function applyRuleFull(
   conclusion = applySubst(subst, conclusion);
   premises = premises.map(premise => {
     return {
-      ...premise,
+      annotations: [...premise.annotations],
       value: applySubst(subst, premise.value),
     };
   });

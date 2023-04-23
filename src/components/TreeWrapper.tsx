@@ -8,46 +8,51 @@ import { parse } from "../logic/syntax/parser";
 import { Expr } from "../logic/syntax/syntactic_logic";
 import { Subst } from "../logic/unification/unification";
 import "./tree.css";
+import { Options } from "./Options";
 
 // TODO: make opaque
 export type timeToken = Tree;
 
-
 interface TreeWrapperProps {
   calculus: calculus;
-  init: Tree | string;
+  init: string;
   renderer: Renderer<string>;
   onDrag?: DraggableEventHandler;
   onStop?: DraggableEventHandler;
   // onClick?: () => void;
   // onEndClick?: () => void;
+  options: Options;
 }
 
 export function TreeWrapper(props: TreeWrapperProps) {
 
-  let init_tree;
-  let highlight_finished = true;
+  let init_tree: Tree;
 
   // we use stringTree instead of Tree to safe a bit of space in the URL
 
-  if (window.location.search) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const goal = urlParams.get('goal');
-    if (goal) {
-      init_tree = goal_tree(valuePremise(parse(goal)));
-    }
-    const tree = urlParams.get('tree');
-    if (tree) {
-      init_tree = stringTreeToTree(JSON.parse(tree) as StringTree);
-    }
-    const highlight = urlParams.get('highlight');
-    if (highlight) {
-      highlight_finished = highlight === "true";
-    }
+  // if (window.location.search) {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const goal = urlParams.get('goal');
+  //   if (goal) {
+  //     init_tree = goal_tree(valuePremise(parse(goal)));
+  //   }
+  //   const tree = urlParams.get('tree');
+  //   if (tree) {
+  //     init_tree = stringTreeToTree(JSON.parse(tree) as StringTree);
+  //   }
+  // }
+  // if (!init_tree) {
+  //   init_tree = typeof props.init === "string" ? goal_tree(valuePremise(parse(props.init))) : props.init;
+  // }
+
+  if (props.options.tree) {
+    init_tree = stringTreeToTree(JSON.parse(props.options.tree) as StringTree);
+  } else if (props.options.goal) {
+    init_tree = goal_tree(valuePremise(parse(props.options.goal)));
+  } else {
+    init_tree = goal_tree(valuePremise(parse(props.init)));
   }
-  if (!init_tree) {
-    init_tree = typeof props.init === "string" ? goal_tree(valuePremise(parse(props.init))) : props.init;
-  }
+
 
   const [tree, setTree] = useState<Tree>(init_tree);
   const [forceUpdate, setForceUpdate] = useState(false);
@@ -96,6 +101,10 @@ export function TreeWrapper(props: TreeWrapperProps) {
   //   console.log("closed: " + closed);
   // }, [closed]);
 
+  useEffect(() => {
+    console.log(props.options);
+  }, []);
+
   return (
     <Draggable
       handle=".separator"
@@ -103,7 +112,7 @@ export function TreeWrapper(props: TreeWrapperProps) {
       onDrag={props.onDrag}
       onStop={props.onStop}
     >
-      <div id="handle" className={closed && highlight_finished ? "finished" : ""}>
+      <div id="handle" className={closed && props.options.highlight ? "finished" : ""}>
         <TreeComponent
           calculus={props.calculus}
           tree={tree}
@@ -112,6 +121,7 @@ export function TreeWrapper(props: TreeWrapperProps) {
           propagateSubst={propagateSubst}
           capture={() => copyTree(tree)}
           restore={restore}
+          options={props.options}
         // onClick={props.onClick}
         // onEndClick={props.onEndClick}
         />

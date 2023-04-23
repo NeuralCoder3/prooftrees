@@ -12,6 +12,7 @@ import { IconButton } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Subst, renderSubst } from "../logic/unification/unification";
 import { timeToken } from "./TreeWrapper";
+import { Options } from "./Options";
 
 
 interface TreeProps {
@@ -22,6 +23,7 @@ interface TreeProps {
   propagateSubst: (subst: Subst) => void;
   restore: (t: timeToken) => void;
   capture: () => timeToken;
+  options: Options;
 }
 
 
@@ -196,6 +198,10 @@ export const TreeComponent = (props: TreeProps) => {
     setSpacerWidth(ruleNameRef.current?.offsetWidth || 0);
   }, [ruleNameRef.current]);
 
+  if (props.tree.annotations.length > 0 && !props.options.showSideConditions) {
+    return <></>;
+  }
+
   return (
     <div>
       <div style={{
@@ -210,6 +216,7 @@ export const TreeComponent = (props: TreeProps) => {
                     tree={t}
                     calculus={props.calculus} update_assumptions={props.update_assumptions} renderer={props.renderer}
                     propagateSubst={props.propagateSubst} restore={props.restore} capture={props.capture}
+                    options={props.options}
                   />
                 </div>
                 <div className="small_spacer" />

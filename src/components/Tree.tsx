@@ -6,7 +6,7 @@ import { Subst, applySubst } from "../logic/unification/unification";
 
 export interface GenericTree<T> {
   conclusion: T;
-  annotations?: Annotations[];
+  annotations: Annotations[];
   assumptions: GenericTree<T>[];
   rule?: string;
 };
@@ -36,6 +36,7 @@ export function applyNamedRule(calc: calculus, name: string, goal: Expr): [Premi
     throw new Error(`Rule ${name} did not apply. Goal: ${debugRenderer.render(goal)}, Conclusion: ${debugRenderer.render(rule.conclusion)}`);
   }
   const [premises, subst] = result;
+  console.log("new premise", premises);
   const goal_vars = getVars(goal);
   const goal_subst: Subst = {};
   for (const v of goal_vars) {
@@ -48,18 +49,18 @@ export function applyNamedRule(calc: calculus, name: string, goal: Expr): [Premi
 
 export function applyTreeSubst(tree: Tree, subst: Subst): Tree {
   return {
+    ...tree,
     conclusion: applySubst(subst, tree.conclusion),
     assumptions: tree.assumptions.map(a => applyTreeSubst(a, subst)),
-    rule: tree.rule,
   };
 }
 
 // deep copy of tree
 export function copyTree(tree: Tree): Tree {
   return {
+    ...tree,
     conclusion: tree.conclusion,
     assumptions: tree.assumptions.map(a => copyTree(a)),
-    rule: tree.rule,
   };
 }
 
@@ -69,16 +70,16 @@ export function isClosed(tree: Tree): boolean {
 
 export function stringTreeToTree(tree: StringTree): Tree {
   return {
+    ...tree,
     conclusion: parse(tree.conclusion),
     assumptions: tree.assumptions.map(a => stringTreeToTree(a)),
-    rule: tree.rule,
   };
 }
 
 export function treeToStringTree(tree: Tree): StringTree {
   return {
+    ...tree,
     conclusion: debugRenderer.render(tree.conclusion),
     assumptions: tree.assumptions.map(a => treeToStringTree(a)),
-    rule: tree.rule,
   };
 }

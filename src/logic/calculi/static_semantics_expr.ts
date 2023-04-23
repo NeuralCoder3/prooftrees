@@ -8,7 +8,10 @@ export const calculus: inf_calculus = {
     convertStringRule({
       name: "TVar",
       conclusion: "typed(?Gamma, ?x, ?k)",
-      premises: ["maps(?Gamma, ?x, ?k)", "is_var(?x)"]
+      premises: [
+        "maps(?Gamma, ?x, ?k)",
+        ["is_var(?x)", "side-condition"],
+      ]
     }),
     convertStringRule({
       name: "TConst",
@@ -21,9 +24,9 @@ export const calculus: inf_calculus = {
       premises: [
         "typed(?Gamma, ?e1, ?i1)",
         "typed(?Gamma, ?e2, ?i2)",
-        "is_int(?i1)",
-        "is_int(?i2)",
-        "is_arith_op(?r)",
+        ["is_int(?i1)", "side-condition"],
+        ["is_int(?i2)", "side-condition"],
+        ["is_arith_op(?r)", "side-condition"],
       ]
     }),
     convertStringRule({
