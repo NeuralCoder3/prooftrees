@@ -11,8 +11,8 @@ export const calculus: inf_calculus = {
         "typed(?Gamma, ?e, ?k1)",
         "typed(?Gamma, ?l, ?k2)",
         "convertible(?k1, ?k2)",
-        "is_scalar(?k1)",
-        "is_scalar(?k2)",
+        ["is_scalar(?k1)", "side-condition"],
+        ["is_scalar(?k2)", "side-condition"],
       ]
     }),
     convertStringRule({
@@ -28,7 +28,7 @@ export const calculus: inf_calculus = {
         "typed(?Gamma, ?e, ?k)",
         "stmt_typed(?Gamma, ?s1)",
         "stmt_typed(?Gamma, ?s2)",
-        "is_scalar(?k)",
+        ["is_scalar(?k)", "side-condition"],
       ]
     }),
     convertStringRule({
@@ -37,7 +37,7 @@ export const calculus: inf_calculus = {
       premises: [
         "typed(?Gamma, ?e, ?k)",
         "stmt_typed(?Gamma, ?s)",
-        "is_scalar(?k)",
+        ["is_scalar(?k)", "side-condition"],
       ]
     }),
     // Program rules

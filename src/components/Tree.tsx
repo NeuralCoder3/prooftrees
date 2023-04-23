@@ -1,4 +1,4 @@
-import { calculus, ruleByName, applyRuleFull } from "../logic/inference/inference_rules";
+import { calculus, ruleByName, applyRuleFull, Premise, Annotations } from "../logic/inference/inference_rules";
 import { parse } from "../logic/syntax/parser";
 import { StringDispatchRenderer } from "../logic/syntax/renderer";
 import { Expr, getVars } from "../logic/syntax/syntactic_logic";
@@ -6,6 +6,7 @@ import { Subst, applySubst } from "../logic/unification/unification";
 
 export interface GenericTree<T> {
   conclusion: T;
+  annotations?: Annotations[];
   assumptions: GenericTree<T>[];
   rule?: string;
 };
@@ -13,10 +14,11 @@ export interface GenericTree<T> {
 export type Tree = GenericTree<Expr>;
 export type StringTree = GenericTree<string>;
 
-export function goal_tree(conclusion: Expr): Tree {
+export function goal_tree(conclusion: Premise): Tree {
   return {
-    conclusion: conclusion,
+    conclusion: conclusion.value,
     assumptions: [],
+    annotations: conclusion.annotations
   };
 }
 
@@ -24,7 +26,7 @@ export type rule_selection = "all" | "applicable" | "unknown" | "calculus";
 
 const debugRenderer = new StringDispatchRenderer();
 
-export function applyNamedRule(calc: calculus, name: string, goal: Expr): [Expr[], Subst] {
+export function applyNamedRule(calc: calculus, name: string, goal: Expr): [Premise[], Subst] {
   const rule = ruleByName(calc, name);
   if (!rule) {
     throw new Error(`Rule ${name} not found`);

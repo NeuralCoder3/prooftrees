@@ -4,22 +4,38 @@ import { Renderer } from '../syntax/renderer';
 import * as logic from '../syntax/syntactic_logic';
 import { Subst, applySubst, unify } from '../unification/unification';
 
+export type Annotations = "side-condition";
+
+export type Premise = {
+  value: logic.Expr;
+  annotations: Annotations[];
+};
+
 export interface InferenceRule {
   conclusion: logic.Expr;
-  premises: logic.Expr[];
+  premises: Premise[];
   name?: string;
 }
 
 export interface StringRule {
   conclusion: string;
-  premises: string[];
+  //         name,     optionally with annotations
+  premises: (string | [string, string])[];
   name?: string;
 }
 
 export function convertStringRule(rule: StringRule): InferenceRule {
+  const premises = rule.premises.map(premise => {
+    if (typeof premise === 'string') {
+      return { value: parse(premise), annotations: [] };
+    } else {
+      const [value, annotations] = premise;
+      return { value: parse(value), annotations: annotations.split(',') as Annotations[] };
+    }
+  });
   return {
     conclusion: parse(rule.conclusion),
-    premises: rule.premises.map(parse),
+    premises: premises,
     name: rule.name,
   };
 }
@@ -29,6 +45,10 @@ export interface calculus {
   name: string;
   // renderers?: Renderer;
 };
+
+export function valuePremise(v: logic.Expr): Premise {
+  return { value: v, annotations: [] };
+}
 
 export function combineCalculus(calculi: calculus[], new_name: string | null = null, rename_rules = false): calculus {
   return {
@@ -49,7 +69,7 @@ export function mkCalculus(name: string, rules: InferenceRule[]): calculus {
 
 export function premiseVariables(rule: InferenceRule): Set<string> {
   return rule.premises
-    .map(premise => logic.getVars(premise))
+    .map(premise => logic.getVars(premise.value))
     .reduce((acc, s) => new Set([...acc, ...s]), new Set());
 }
 
@@ -63,7 +83,7 @@ export function applyRuleFull(
   inf: InferenceRule,
   goal: logic.Expr,
   var_bindings: Subst | null = {} // null => ignore, else needs to bind all free variables
-): [logic.Expr[], Subst] | null {
+): [Premise[], Subst] | null {
   let conclusion = inf.conclusion;
   let premises = inf.premises;
   // name inference rule apart from goal
@@ -71,7 +91,12 @@ export function applyRuleFull(
   const inf_vars = new Set([...logic.getVars(conclusion), ...premiseVariables(inf)]);
   const subst = logic.nameApart(inf_vars, goal_vars);
   conclusion = applySubst(subst, conclusion);
-  premises = premises.map(premise => applySubst(subst, premise));
+  premises = premises.map(premise => {
+    return {
+      ...premise,
+      value: applySubst(subst, premise.value),
+    };
+  });
 
   if (var_bindings !== null) {
     const freeVariables = getFreeVariables({
@@ -82,15 +107,23 @@ export function applyRuleFull(
     for (const freeVariable of freeVariables) {
       assert(freeVariable in var_bindings);
     }
-    premises = premises.map(premise =>
-      applySubst(var_bindings, premise)
-    );
+    premises = premises.map(premise => {
+      return {
+        ...premise,
+        value: applySubst(var_bindings, premise.value),
+      };
+    });
   }
   const mgu = unify(conclusion, goal);
   if (mgu === null) {
     return null;
   }
-  const result = premises.map(premise => applySubst(mgu, premise));
+  const result = premises.map(premise => {
+    return {
+      ...premise,
+      value: applySubst(mgu, premise.value),
+    }
+  });
   return [result, mgu];
 }
 
@@ -98,7 +131,7 @@ export function applyRule(
   inf: InferenceRule,
   goal: logic.Expr,
   var_bindings: Subst | null = {}
-): logic.Expr[] | null {
+): Premise[] | null {
   const result = applyRuleFull(inf, goal, var_bindings);
   if (result === null) {
     return null;
@@ -117,7 +150,7 @@ export function ruleByName(calculus: calculus, name: string): InferenceRule | nu
 
 
 export function ruleToString(rule: InferenceRule, renderer: Renderer<string>): string {
-  const premises = rule.premises.map(premise => renderer.render(premise));
+  const premises = rule.premises.map(premise => renderer.render(premise.value));
   const conclusion = renderer.render(rule.conclusion);
   const length = Math.max(Math.max(...premises.map(premise => premise.length)), conclusion.length);
   const name = rule.name ? rule.name : '';

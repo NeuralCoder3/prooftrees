@@ -1,5 +1,5 @@
 import { Fragment, createRef, useEffect, useLayoutEffect, useState } from "react";
-import { applyRule, calculus } from "../logic/inference/inference_rules";
+import { Premise, applyRule, calculus } from "../logic/inference/inference_rules";
 import { Tree, applyNamedRule } from "./Tree";
 import { assert } from "console";
 import { parse } from "../logic/syntax/parser";
@@ -17,7 +17,7 @@ import { timeToken } from "./TreeWrapper";
 interface TreeProps {
   calculus: calculus;
   tree: Tree;
-  update_assumptions: (tree: Tree) => (rule: string | undefined, assumptions: Expr[]) => void;
+  update_assumptions: (tree: Tree) => (rule: string | undefined, assumptions: Premise[]) => void;
   renderer: Renderer<string>;
   propagateSubst: (subst: Subst) => void;
   restore: (t: timeToken) => void;

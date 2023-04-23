@@ -1,6 +1,6 @@
 import Draggable, { DraggableEventHandler } from "react-draggable";
 import { TreeComponent } from "./TreeComponent";
-import { calculus } from "../logic/inference/inference_rules";
+import { Premise, calculus, valuePremise } from "../logic/inference/inference_rules";
 import { StringTree, Tree, applyTreeSubst, copyTree, goal_tree, isClosed, stringTreeToTree, treeToStringTree } from "./Tree";
 import { useEffect, useState } from "react";
 import { Renderer } from "../logic/syntax/renderer";
@@ -34,7 +34,7 @@ export function TreeWrapper(props: TreeWrapperProps) {
     const urlParams = new URLSearchParams(window.location.search);
     const goal = urlParams.get('goal');
     if (goal) {
-      init_tree = goal_tree(parse(goal));
+      init_tree = goal_tree(valuePremise(parse(goal)));
     }
     const tree = urlParams.get('tree');
     if (tree) {
@@ -46,7 +46,7 @@ export function TreeWrapper(props: TreeWrapperProps) {
     }
   }
   if (!init_tree) {
-    init_tree = typeof props.init === "string" ? goal_tree(parse(props.init)) : props.init;
+    init_tree = typeof props.init === "string" ? goal_tree(valuePremise(parse(props.init))) : props.init;
   }
 
   const [tree, setTree] = useState<Tree>(init_tree);
@@ -65,7 +65,7 @@ export function TreeWrapper(props: TreeWrapperProps) {
     // console.log("Use exportTree() to export the current tree.")
   });
 
-  const update_assumptions = (subtree: Tree) => (rule: string | undefined, assumptions: Expr[]) => {
+  const update_assumptions = (subtree: Tree) => (rule: string | undefined, assumptions: Premise[]) => {
     subtree.assumptions = assumptions.map(a => goal_tree(a));
     subtree.rule = rule;
     // TODO: find better way to update tree components

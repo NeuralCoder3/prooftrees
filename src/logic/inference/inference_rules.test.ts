@@ -14,24 +14,24 @@ describe("colorCalculus", () => {
 
   it("green1", () => {
     expect(
-      applyRule(ruleByName(color_calculus, "Green2")!, parse("Green")))
+      applyRule(ruleByName(color_calculus, "Green2")!, parse("Green"))?.map(p => p.value))
       .toEqual([parse("Yellow"), parse("Blue")]);
   });
 
   it("complete_examples", () => {
     const goal = parse("Brown");
     const tree = applyRule(ruleByName(color_calculus, "Brown1")!, goal);
-    expect(tree).toEqual([parse("Red"), parse("Green")]);
+    expect(tree?.map(p => p.value)).toEqual([parse("Red"), parse("Green")]);
     const [g1, g2] = tree!;
-    const tree1 = applyRule(ruleByName(color_calculus, "Red")!, g1);
-    expect(tree1).toEqual([]);
-    const tree2 = applyRule(ruleByName(color_calculus, "Green2")!, g2);
-    expect(tree2).toEqual([parse("Yellow"), parse("Blue")]);
+    const tree1 = applyRule(ruleByName(color_calculus, "Red")!, g1.value);
+    expect(tree1?.map(p => p.value)).toEqual([]);
+    const tree2 = applyRule(ruleByName(color_calculus, "Green2")!, g2.value);
+    expect(tree2?.map(p => p.value)).toEqual([parse("Yellow"), parse("Blue")]);
     const [g2_1, g2_2] = tree2!;
-    const tree2_1 = applyRule(ruleByName(color_calculus, "Yellow")!, g2_1);
-    expect(tree2_1).toEqual([]);
-    const tree2_2 = applyRule(ruleByName(color_calculus, "Blue")!, g2_2);
-    expect(tree2_2).toEqual([]);
+    const tree2_1 = applyRule(ruleByName(color_calculus, "Yellow")!, g2_1.value);
+    expect(tree2_1?.map(p => p.value)).toEqual([]);
+    const tree2_2 = applyRule(ruleByName(color_calculus, "Blue")!, g2_2.value);
+    expect(tree2_2?.map(p => p.value)).toEqual([]);
   });
 });
 
@@ -45,7 +45,7 @@ describe("unitTest", () => {
     const res = applyRuleFull(inf, goal);
     expect(res).not.toBeNull();
     const [premises, subst] = res!;
-    expect(premises).toEqual([parse("equal(3,1)")]);
+    expect(premises.map(p => p.value)).toEqual([parse("equal(3,1)")]);
     expect(subst).toEqual({
       "i": parse("2"),
       "i0": parse("3"),
@@ -61,7 +61,7 @@ describe("unitTest", () => {
     const res = applyRuleFull(inf, goal);
     expect(res).not.toBeNull();
     const [premises, subst] = res!;
-    expect(premises).toEqual([parse("equal(3,1)")]);
+    expect(premises.map(p => p.value)).toEqual([parse("equal(3,1)")]);
     expect(subst).toEqual({
       "i": parse("2"),
       "i0": parse("3"),
@@ -82,7 +82,7 @@ describe("exprTypingRules", () => {
 
     // with bound
     const tree_bound = applyRule(ruleByName(expr_type_calculus, "TArith")!, goal, { "i1": parse("int"), "i2": parse("int") });
-    expect(tree_bound).toEqual([
+    expect(tree_bound?.map(p => p.value)).toEqual([
       parse(`typed(${gamma}, BinOp(Plus,Indir(x),y), int)`),
       parse(`typed(${gamma}, 1, int)`),
       parse("is_int(int)"),
@@ -103,7 +103,7 @@ describe("exprTypingRules", () => {
       // additional information previously unknown
       "type": parse("int"),
     });
-    expect(tree).toEqual([
+    expect(tree?.map(p => p.value)).toEqual([
       parse(`typed(${gamma}, BinOp(Plus,Indir(x),y), ?i1)`),
       parse(`typed(${gamma}, 1, ?i2)`),
       parse("is_int(?i1)"),
@@ -112,8 +112,8 @@ describe("exprTypingRules", () => {
     ]);
     const [g1, g2] = tree;
 
-    const tree2 = applyRule(ruleByName(expr_type_calculus, "TConst")!, g2);
-    expect(tree2).toEqual([
+    const tree2 = applyRule(ruleByName(expr_type_calculus, "TConst")!, g2.value);
+    expect(tree2?.map(p => p.value)).toEqual([
       parse(`is_bound(1)`),
     ]);
 

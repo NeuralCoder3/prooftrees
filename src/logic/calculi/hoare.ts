@@ -15,7 +15,7 @@ export const calculus: inf_calculus = {
       premises: [
         // or inline
         "Define(?Q', Subst(?Q, ?x, ?e))",
-        "is_var(?x)",
+        ["is_var(?x)", "side-condition"],
       ]
     }),
     convertStringRule({

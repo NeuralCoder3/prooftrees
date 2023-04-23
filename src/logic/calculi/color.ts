@@ -1,4 +1,5 @@
 import * as inference_rules from '../inference/inference_rules';
+import { valuePremise } from '../inference/inference_rules';
 import * as logic from '../syntax/syntactic_logic';
 
 // https://www.overleaf.com/read/csfvyggxptqr
@@ -32,32 +33,32 @@ export const calculus: inference_rules.calculus = inference_rules.mkCalculus("Co
   {
     name: "Green1",
     conclusion: green,
-    premises: [blue, yellow],
+    premises: [blue, yellow].map(valuePremise)
   },
   {
     name: "Green2",
     conclusion: green,
-    premises: [yellow, blue],
+    premises: [yellow, blue].map(valuePremise),
   },
   {
     name: "Orange",
     conclusion: orange,
-    premises: [red, yellow],
+    premises: [red, yellow].map(valuePremise),
   },
   {
     name: "Purple",
     conclusion: purple,
-    premises: [red, blue],
+    premises: [red, blue].map(valuePremise),
   },
   // Tertiary colors
   {
     name: "Brown1",
     conclusion: brown,
-    premises: [red, green],
+    premises: [red, green].map(valuePremise),
   },
   {
     name: "Brown2",
     conclusion: brown,
-    premises: [purple, orange],
+    premises: [purple, orange].map(valuePremise),
   }
 ]);

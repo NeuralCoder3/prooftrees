@@ -32,7 +32,7 @@ export const calculus: inf_calculus = {
       premises: [
         "typed(?Gamma, ?e1, ?k1)",
         "typed(?Gamma, ?e2, ?k2)",
-        "is_cmp_op(?m)",
+        ["is_cmp_op(?m)", "side-condition"],
         "convertible(?k1, ?k2)"
       ]
     }),
@@ -42,7 +42,7 @@ export const calculus: inf_calculus = {
       conclusion: "typed(?Gamma, Indir(?e), ?k)",
       premises: [
         "typed(?Gamma, ?e, Ptr(?k))",
-        "is_scalar(?k)"
+        ["is_scalar(?k)", "side-condition"]
       ]
     }),
     convertStringRule({

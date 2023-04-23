@@ -11,7 +11,10 @@ export const calculus: inf_calculus = {
     convertStringRule({
       name: "int",
       conclusion: "convertible(?i1, ?i2)",
-      premises: ["is_int(?i1)", "is_int(?i2)"]
+      premises: [
+        ["is_int(?i1)", "side-condition"],
+        ["is_int(?i2)", "side-condition"],
+      ]
     }),
     convertStringRule({
       name: "ptr_eq",
