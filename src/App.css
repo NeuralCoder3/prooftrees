@@ -56,12 +56,22 @@ html {
   width: 100%;
 }
 
+
 .main {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  /* transform: translate(-50%, -50%); */
+  /* top: 30%;
+  left: 30%;
+  right: 50%; */
+}
+
+.main_centered {
   display: flex;
   flex-direction: row;
   position: absolute;
   top: 30%;
   left: 30%;
-  /* transform: translate(-50%, -50%); */
   right: 50%;
 }

@@ -5,7 +5,6 @@ import { StringTree, Tree, applyTreeSubst, copyTree, goal_tree, isClosed, string
 import { useEffect, useState } from "react";
 import { Renderer } from "../logic/syntax/renderer";
 import { parse } from "../logic/syntax/parser";
-import { Expr } from "../logic/syntax/syntactic_logic";
 import { Subst } from "../logic/unification/unification";
 import "./tree.css";
 import { Options } from "./Options";
@@ -19,8 +18,6 @@ interface TreeWrapperProps {
   renderer: Renderer<string>;
   onDrag?: DraggableEventHandler;
   onStop?: DraggableEventHandler;
-  // onClick?: () => void;
-  // onEndClick?: () => void;
   options: Options;
 }
 
@@ -29,21 +26,6 @@ export function TreeWrapper(props: TreeWrapperProps) {
   let init_tree: Tree;
 
   // we use stringTree instead of Tree to safe a bit of space in the URL
-
-  // if (window.location.search) {
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const goal = urlParams.get('goal');
-  //   if (goal) {
-  //     init_tree = goal_tree(valuePremise(parse(goal)));
-  //   }
-  //   const tree = urlParams.get('tree');
-  //   if (tree) {
-  //     init_tree = stringTreeToTree(JSON.parse(tree) as StringTree);
-  //   }
-  // }
-  // if (!init_tree) {
-  //   init_tree = typeof props.init === "string" ? goal_tree(valuePremise(parse(props.init))) : props.init;
-  // }
 
   if (props.options.tree) {
     init_tree = stringTreeToTree(JSON.parse(props.options.tree) as StringTree);
@@ -62,20 +44,15 @@ export function TreeWrapper(props: TreeWrapperProps) {
     _global.exportTree = () => {
       const urlParams = new URLSearchParams(window.location.search);
       urlParams.set('tree', JSON.stringify(treeToStringTree(tree)));
-      // window.location.search = urlParams.toString();
-      // console.log(urlParams.toString());
       const url = window.location.origin + window.location.pathname + "?" + urlParams.toString();
       console.log(url);
     };
-    // console.log("Use exportTree() to export the current tree.")
   });
 
   const update_assumptions = (subtree: Tree) => (rule: string | undefined, assumptions: Premise[]) => {
     subtree.assumptions = assumptions.map(a => goal_tree(a));
     subtree.rule = rule;
     // TODO: find better way to update tree components
-    // setTree({ ...tree });
-    // force update
     setForceUpdate(!forceUpdate);
   };
 
@@ -85,21 +62,14 @@ export function TreeWrapper(props: TreeWrapperProps) {
 
   // TODO: handle non-local variable overlap => always use fresh variables
   const propagateSubst = (subst: Subst) => {
-    // const treeCopy = copyTree(tree);
     setTree(
       (tree) => {
         const new_tree = applyTreeSubst(tree, subst);
         return new_tree;
       });
-    // const new_tree = applyTreeSubst(tree, subst);
-    // setTree(new_tree);
   };
 
   const closed = isClosed(tree);
-
-  // useEffect(() => {
-  //   console.log("closed: " + closed);
-  // }, [closed]);
 
   useEffect(() => {
     console.log(props.options);
@@ -122,8 +92,6 @@ export function TreeWrapper(props: TreeWrapperProps) {
           capture={() => copyTree(tree)}
           restore={restore}
           options={props.options}
-        // onClick={props.onClick}
-        // onEndClick={props.onEndClick}
         />
       </div>
     </ Draggable>

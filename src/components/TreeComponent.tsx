@@ -90,14 +90,6 @@ export const TreeComponent = (props: TreeProps) => {
               >
                 <DeleteIcon fontSize="inherit" />
               </IconButton>
-              {/* <button
-                className="delete_button"
-                onClick={(e) => {
-                  props.update_assumptions(props.tree)(undefined, []);
-                }}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </button> */}
             </span>
           )
           :
@@ -108,11 +100,6 @@ export const TreeComponent = (props: TreeProps) => {
                   ({ value: rule.name, label: rule.name })
                 )
               }
-              // onChange={(e) => {
-              //   props.onEndClick?.();
-              //   handleRule(e.value);
-              //   return false;
-              // }}
               className={
                 hadError ? "error" : ""
               }
@@ -128,67 +115,17 @@ export const TreeComponent = (props: TreeProps) => {
                     : provided,
               }}
 
-
-              // inputValue="Select rule"
-              // value={null}
-
               onChange={(e) => {
-                // props.onEndClick?.();
                 if (e?.value) {
                   handleRule(e.value);
                 }
-                // console.log("change");
-                // return false;
               }}
 
               onInputChange={(e) => { }}
               onMenuClose={() => { }}
               onMenuOpen={() => { }}
             />
-            // <Select
-            //   // onClick={(e) => {
-            //   //   console.log("click");
-            //   //   props.onClick?.();
-            //   // }}
-            //   // onAbort={(e) => {
-            //   //   console.log("abort");
-            //   //   props.onEndClick?.();
-            //   // }}
-            //   // onAbortCapture={(e) => {
-            //   //   console.log("abort capture");
-            //   //   props.onEndClick?.();
-            //   // }}
-            //   // onAuxClick={(e) => {
-            //   //   console.log("aux click");
-            //   //   props.onEndClick?.();
-            //   // }}
-            //   // onLostPointerCapture={(e) => {
-            //   //   console.log("lost pointer capture");
-            //   //   props.onEndClick?.();
-            //   // }}
-
-
-            //   onChange={(e) => {
-            //     props.onEndClick?.();
-            //     handleRule(e.target.value);
-            //     return false;
-            //   }}
-            //   className={
-            //     hadError ? "error" : ""
-            //   }
-            // >
-            //   <option value="">Select rule</option>
-            //   {
-            //     props.calculus.rules.map((rule, index) =>
-            //       <option key={index} value={rule.name}>{rule.name}</option>
-            //     )
-            //   }
-            // </Select>
           )
-        // <button onClick={() => props.update_assumptions(props.tree)("Rule", ["ABC"])
-        // }>
-        //   Add hypothesis
-        // </button>
       }
     </div >
   );
