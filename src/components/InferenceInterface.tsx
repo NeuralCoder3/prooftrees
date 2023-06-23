@@ -8,15 +8,45 @@ import { StringDispatchRenderer } from '../logic/syntax/renderer';
 import React from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { Options, default_options } from './Options';
+import { combineCalculus } from '../logic/inference/inference_rules';
 
 // const calculus = color.calculus;
 // const renderer = new StringDispatchRenderer();
 // const goal = "Brown";
 
-const calculus = expr_ty.calculus;
+const calculus = combineCalculus(
+  [
+    expr_ty.calculus,
+    stmt_ty.calculus,
+  ],
+  "typed",
+  false
+);
 const renderer = new StringDispatchRenderer()
-  .registerAppDispatcher(expr_ty.app_renderer).registerConstDispatcher(expr_ty.const_renderer);
-const goal = "typed(Γ, BinOp(Minus, BinOp(Plus,Indir(x),y), 1), ?type)";
+  // ;
+  .registerAppDispatcher(expr_ty.app_renderer).registerConstDispatcher(expr_ty.const_renderer)
+  .registerAppDispatcher(stmt_ty.app_renderer).registerConstDispatcher(stmt_ty.const_renderer);
+// const goal = "typed(Γ, BinOp(Minus, BinOp(Plus,Indir(x),y), 1), ?type)";
+const goal = `
+stmt_typed(Γ, Block(
+  Seq(
+    Assign(y, 1),
+    Seq(
+      Block(
+        Seq(
+          Declare(int, y),
+          Seq(
+            Assign(y, x),
+            epsilon
+          )
+        )
+      ),
+      epsilon
+    )
+  )
+))
+`.replaceAll("\n", "");
+
 
 
 export function InferenceInterface() {

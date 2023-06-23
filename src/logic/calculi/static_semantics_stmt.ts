@@ -40,6 +40,14 @@ export const calculus: inf_calculus = {
         ["is_scalar(?k)", "side-condition"],
       ]
     }),
+    convertStringRule({
+      name: "TDecl",
+      conclusion: "prg_typed(?Gamma, Seq(Declare(?t, ?n), ?p))",
+      premises: [
+        "prg_typed(Extend(?n, ?t, ?Gamma), ?p)",
+        ["is_type(?t)", "side-condition"],
+      ]
+    }),
     // Program rules
     convertStringRule({
       name: "TBlock",
@@ -57,6 +65,47 @@ export const calculus: inf_calculus = {
       ]
     }),
     convertStringRule({
+      name: "TSeq1",
+      conclusion: "prg_typed(?Gamma, Seq(?s, epsilon))",
+      premises: [
+        "stmt_typed(?Gamma, ?s)",
+      ]
+    }),
+    convertStringRule({
+      name: "TSeq2",
+      conclusion: "prg_typed(?Gamma, Seq(?s, Seq(?s2, epsilon)))",
+      premises: [
+        "stmt_typed(?Gamma, ?s)",
+        "stmt_typed(?Gamma, ?s2)",
+      ]
+    }),
+    // just for testing
+    convertStringRule({
+      name: "SMT",
+      conclusion: "?A",
+      premises: [
+      ]
+    }),
+    convertStringRule({
+      name: "IntLookup",
+      conclusion: "maps(?Gamma, ?x, int)",
+      premises: [
+      ]
+    }),
+    convertStringRule({
+      name: "LookupExtend",
+      conclusion: "maps(Extend(?x, ?t, ?Gamma), ?x, ?t)",
+      premises: [
+      ]
+    }),
+    convertStringRule({
+      name: "ConvRefl",
+      conclusion: "convertible(?t, ?t)",
+      premises: [
+      ]
+    }),
+    // 
+    convertStringRule({
       name: "TTerm",
       conclusion: "prg_typed(?Gamma, epsilon)",
       premises: [
@@ -72,6 +121,8 @@ export const app_renderer: AppDispatchRenderer<string> = {
   "Assign": (_, args) => `${args[0]} := ${args[1]};`,
   "If": (_, args) => `if (${args[0]}) ${args[1]} else ${args[2]}`,
   "While": (_, args) => `while (${args[0]}) ${args[1]}`,
+  "Declare": (_, args) => `${args[0]} ${args[1]};`,
+  "Extend": (_, args) => `${args[2]}[${args[0]} ↦ ${args[1]}]`,
   "Block": (_, args) => `{ ${args[0]} }`,
   "Seq": ([f, renderer], _) => renderNestedList(f, "Seq", "epsilon", renderer, " ", " ", "", "")
 
