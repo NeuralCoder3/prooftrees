@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/prooftrees/static/css/main.416de4d8.css",
-    "main.js": "/prooftrees/static/js/main.c033afef.js",
+    "main.js": "/prooftrees/static/js/main.4fcabf1d.js",
     "static/js/787.a29ceb5c.chunk.js": "/prooftrees/static/js/787.a29ceb5c.chunk.js",
     "index.html": "/prooftrees/index.html",
     "main.416de4d8.css.map": "/prooftrees/static/css/main.416de4d8.css.map",
-    "main.c033afef.js.map": "/prooftrees/static/js/main.c033afef.js.map",
+    "main.4fcabf1d.js.map": "/prooftrees/static/js/main.4fcabf1d.js.map",
     "787.a29ceb5c.chunk.js.map": "/prooftrees/static/js/787.a29ceb5c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.416de4d8.css",
-    "static/js/main.c033afef.js"
+    "static/js/main.4fcabf1d.js"
   ]
 }
