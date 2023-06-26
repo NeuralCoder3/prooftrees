@@ -2,7 +2,7 @@
 // Definition 6.6.5: Implicit Type Conversion 
 // https://compilers.cs.uni-saarland.de/prog2pretext/main/webapp/sec-c0-type.html#def-c0-autocast
 
-import { calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
+import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
 import { AppDispatchRenderer } from "../syntax/renderer";
 
 export const calculus: inf_calculus = {

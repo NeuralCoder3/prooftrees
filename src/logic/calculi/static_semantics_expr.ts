@@ -1,4 +1,4 @@
-import { calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
+import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
 import { AppDispatchRenderer, ConstDispatchRenderer } from '../syntax/renderer';
 import { renderer as type_app_renderer } from './type_conversion';
 

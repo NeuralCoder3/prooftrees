@@ -78,6 +78,23 @@ export function getConstantSymbols(e: Expr): Set<ConstantSymbols> {
   }
 }
 
+export function replaceInExpr(e: Expr, src: Expr, dst: Expr): Expr {
+  if (equalExpr(e, src)) {
+    return dst;
+  }
+  switch (e.kind) {
+    case "const":
+      return e;
+    case "app":
+      return mkApp(
+        replaceInExpr(e.callee, src, dst),
+        e.args.map(a => replaceInExpr(a, src, dst))
+      );
+    case "var":
+      return e;
+  }
+}
+
 export function equalExpr(e1: Expr, e2: Expr): boolean {
   if (e1.kind !== e2.kind) {
     return false;

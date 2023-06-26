@@ -40,7 +40,7 @@ export function convertStringRule(rule: StringRule): InferenceRule {
   };
 }
 
-export interface calculus {
+export interface Calculus {
   rules: InferenceRule[];
   name: string;
   // renderers?: Renderer;
@@ -50,7 +50,7 @@ export function valuePremise(v: logic.Expr): Premise {
   return { value: v, annotations: [] };
 }
 
-export function combineCalculus(calculi: calculus[], new_name: string | null = null, rename_rules = false): calculus {
+export function combineCalculus(calculi: Calculus[], new_name: string | null = null, rename_rules = false): Calculus {
   return {
     name: new_name || calculi.map(c => c.name).join(' + '),
     rules: calculi.map(c => {
@@ -63,7 +63,7 @@ export function combineCalculus(calculi: calculus[], new_name: string | null = n
   };
 }
 
-export function mkCalculus(name: string, rules: InferenceRule[]): calculus {
+export function mkCalculus(name: string, rules: InferenceRule[]): Calculus {
   return { name, rules };
 }
 
@@ -139,7 +139,7 @@ export function applyRule(
   return result[0];
 }
 
-export function ruleByName(calculus: calculus, name: string): InferenceRule | null {
+export function ruleByName(calculus: Calculus, name: string): InferenceRule | null {
   for (const rule of calculus.rules) {
     if (rule.name === name) {
       return rule;
@@ -165,7 +165,7 @@ function rootFunctionName(expr: logic.Expr): string | null {
   return null;
 }
 
-export function associatedFunctions(calc: calculus): string[] {
+export function associatedFunctions(calc: Calculus): string[] {
   const result = [];
   for (const rule of calc.rules) {
     const root = rootFunctionName(rule.conclusion);

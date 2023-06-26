@@ -1,0 +1,30 @@
+.CalculusRule {
+  width: 100% !important;
+  display: flex;
+  flex-direction: row;
+}
+
+.CalculusRule>.rule {
+  /* scale: 0.5; */
+  transform: scale(0.8);
+  transform-origin: 0 0;
+  width: 100%;
+  padding-bottom: 20px;
+  /* display: flex;
+  padding: 0;
+  margin: 0; */
+}
+
+.CalculusRule>.delete {
+  float: left;
+}
+
+
+.CalculusRules {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center;
+  justify-content: center; */
+  justify-self: left;
+  width: 100%;
+}

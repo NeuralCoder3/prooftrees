@@ -1,6 +1,6 @@
 import Draggable, { DraggableEventHandler } from "react-draggable";
 import { TreeComponent } from "./TreeComponent";
-import { Premise, calculus, valuePremise } from "../logic/inference/inference_rules";
+import { Premise, Calculus, valuePremise } from "../logic/inference/inference_rules";
 import { StringTree, Tree, applyTreeSubst, copyTree, goal_tree, isClosed, stringTreeToTree, treeToStringTree } from "./Tree";
 import { useEffect, useState } from "react";
 import { Renderer } from "../logic/syntax/renderer";
@@ -13,7 +13,7 @@ import { Options } from "./Options";
 export type timeToken = Tree;
 
 interface TreeWrapperProps {
-  calculus: calculus;
+  calculus: Calculus;
   init: string;
   renderer: Renderer<string>;
   onDrag?: DraggableEventHandler;

@@ -1,4 +1,4 @@
-import { calculus, ruleByName, applyRuleFull, Premise, Annotations } from "../logic/inference/inference_rules";
+import { Calculus, ruleByName, applyRuleFull, Premise, Annotations, InferenceRule } from "../logic/inference/inference_rules";
 import { parse } from "../logic/syntax/parser";
 import { StringDispatchRenderer } from "../logic/syntax/renderer";
 import { Expr, getVars } from "../logic/syntax/syntactic_logic";
@@ -9,6 +9,7 @@ export interface GenericTree<T> {
   annotations: Annotations[];
   assumptions: GenericTree<T>[];
   rule?: string;
+  open?: boolean;
 };
 
 export type Tree = GenericTree<Expr>;
@@ -26,7 +27,7 @@ export type rule_selection = "all" | "applicable" | "unknown" | "calculus";
 
 const debugRenderer = new StringDispatchRenderer();
 
-export function applyNamedRule(calc: calculus, name: string, goal: Expr): [Premise[], Subst] {
+export function applyNamedRule(calc: Calculus, name: string, goal: Expr): [Premise[], Subst] {
   const rule = ruleByName(calc, name);
   if (!rule) {
     throw new Error(`Rule ${name} not found`);
@@ -81,5 +82,18 @@ export function treeToStringTree(tree: Tree): StringTree {
     ...tree,
     conclusion: debugRenderer.render(tree.conclusion),
     assumptions: tree.assumptions.map(a => treeToStringTree(a)),
+  };
+}
+
+export function ruleToTree(rule: InferenceRule): Tree {
+  return {
+    conclusion: rule.conclusion,
+    assumptions: rule.premises.map(p => {
+      const t = goal_tree(p);
+      t.open = true;
+      return t;
+    }),
+    annotations: [],
+    rule: rule.name,
   };
 }

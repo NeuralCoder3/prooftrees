@@ -1,5 +1,5 @@
 import { Fragment, createRef, useEffect, useLayoutEffect, useState } from "react";
-import { Premise, applyRule, calculus } from "../logic/inference/inference_rules";
+import { Premise, applyRule, Calculus } from "../logic/inference/inference_rules";
 import { Tree, applyNamedRule } from "./Tree";
 import { assert } from "console";
 import { parse } from "../logic/syntax/parser";
@@ -16,14 +16,15 @@ import { Options } from "./Options";
 
 
 interface TreeProps {
-  calculus: calculus;
+  calculus: Calculus;
   tree: Tree;
-  update_assumptions: (tree: Tree) => (rule: string | undefined, assumptions: Premise[]) => void;
   renderer: Renderer<string>;
-  propagateSubst: (subst: Subst) => void;
   restore: (t: timeToken) => void;
-  capture: () => timeToken;
   options: Options;
+  capture: () => timeToken;
+  update_assumptions: (tree: Tree) => (rule: string | undefined, assumptions: Premise[]) => void;
+  propagateSubst: (subst: Subst) => void;
+  locked?: boolean;
 }
 
 
@@ -83,13 +84,16 @@ export const TreeComponent = (props: TreeProps) => {
         props.tree.rule ?
           (
             <span>{props.tree.rule}
-              <IconButton color="primary" aria-label="Delete Subtree" component="label"
-                onClick={(e) => {
-                  reset();
-                }}
-              >
-                <DeleteIcon fontSize="inherit" />
-              </IconButton>
+              {
+                !props.locked &&
+                <IconButton color="primary" aria-label="Delete Subtree" component="label"
+                  onClick={(e) => {
+                    reset();
+                  }}
+                >
+                  <DeleteIcon fontSize="inherit" />
+                </IconButton>
+              }
             </span>
           )
           :
@@ -144,26 +148,30 @@ export const TreeComponent = (props: TreeProps) => {
       <div style={{
         width: "fit-content"
       }}>
-        <div className="nobreak_center">
-          {
-            props.tree.assumptions.map((t, index) =>
-              <Fragment key={index}>
-                <div>
-                  <TreeComponent
-                    tree={t}
-                    calculus={props.calculus} update_assumptions={props.update_assumptions} renderer={props.renderer}
-                    propagateSubst={props.propagateSubst} restore={props.restore} capture={props.capture}
-                    options={props.options}
-                  />
-                </div>
-                <div className="small_spacer" />
-              </Fragment>
-            )
-          }
-        </div>
-        <div className="separator" >
-          {rule_name}
-        </div>
+        {!props.tree.open &&
+          <>
+            <div className="nobreak_center">
+              {
+                props.tree.assumptions.map((t, index) =>
+                  <Fragment key={index}>
+                    <div>
+                      <TreeComponent
+                        tree={t}
+                        calculus={props.calculus} update_assumptions={props.update_assumptions} renderer={props.renderer}
+                        propagateSubst={props.propagateSubst} restore={props.restore} capture={props.capture}
+                        options={props.options}
+                      />
+                    </div>
+                    <div className="small_spacer" />
+                  </Fragment>
+                )
+              }
+            </div>
+            <div className="separator" >
+              {rule_name}
+            </div>
+          </>
+        }
         <div className="nobreak_center">
           {props.renderer.render(props.tree.conclusion)}
           <div className="spacer" style={{

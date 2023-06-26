@@ -6,7 +6,9 @@ describe("listTest", () => {
 
   const app_renderer: AppDispatchRenderer<string> = {
     "fac": (_, args) => `${args[0]}!`,
-    "Cons": ([f, renderer], _) => renderNestedList(f, "Cons", "Nil", renderer, ", ", " ++ ", "[", "]"),
+    "Cons": ([f, renderer], _) => renderNestedList(f, "Cons", "Nil", renderer, ", ",
+      (left, right) => left + " ++ " + right
+      , "[", "]"),
   };
 
   const const_renderer: ConstDispatchRenderer<string> = {

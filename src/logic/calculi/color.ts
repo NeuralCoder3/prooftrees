@@ -12,7 +12,7 @@ const orange = logic.mkConst("Orange");
 const purple = logic.mkConst("Purple");
 const brown = logic.mkConst("Brown");
 
-export const calculus: inference_rules.calculus = inference_rules.mkCalculus("Color", [
+export const calculus: inference_rules.Calculus = inference_rules.mkCalculus("Color", [
   // Axioms = primary colors
   {
     name: "Blue",

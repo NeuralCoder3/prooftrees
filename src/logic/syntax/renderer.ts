@@ -1,4 +1,4 @@
-import { App, Const, Expr, Var } from "./syntactic_logic";
+import { App, Const, Expr, Var, equalExpr, replaceInExpr } from "./syntactic_logic";
 
 export abstract class Renderer<T> {
   abstract render(e: Expr): T;
@@ -18,6 +18,8 @@ export class DispatchRenderer<T> extends Renderer<T> {
     private default_app: AppRenderer<T>,
     private higher_order_function_handler: (f: T, args: T[]) => T,
     private var_handler: (v: Var) => T,
+    private preprocess: (e: Expr) => Expr = (e: Expr) => e,
+    private postprocess: (t: T) => T = (t: T) => t
   ) {
     super();
   }
@@ -60,26 +62,59 @@ export class DispatchRenderer<T> extends Renderer<T> {
     }
   }
 
-  render(e: Expr): T {
+  render(e_: Expr): T {
+    const e = this.preprocess(e_);
+    let result;
     switch (e.kind) {
       case "const":
-        return this.renderConst(e);
+        result = this.renderConst(e);
+        break;
       case "app":
-        return this.renderApp(e, e.args.map(this.render.bind(this)));
+        result = this.renderApp(e, e.args.map(this.render.bind(this)));
+        break;
       case "var":
-        return this.var_handler(e);
+        result = this.var_handler(e);
+        break;
     }
+    result = this.postprocess(result);
+    return result;
   }
 }
 
 export class StringDispatchRenderer extends DispatchRenderer<string> {
 
-  constructor() {
+  constructor(aliases: [Expr, Expr][] = []) {
+
+    // const aliasResolution = (s: string) => {
+    //   let result = s;
+    //   do {
+    //     s = result;
+    //     for (const k in aliases) {
+    //       result = result.replaceAll(k, aliases[k]);
+    //     }
+    //     console.log(result);
+    //   } while (result !== s);
+    //   return result;
+    // };
+
+    const aliasResolution = (e: Expr) => {
+      let result = e;
+      do {
+        e = result;
+        for (const [k, v] of aliases) {
+          result = replaceInExpr(result, k, v);
+        }
+      } while (!equalExpr(result, e));
+      return result;
+    };
+
+
     super(
       c => c.value,
       ([f, renderer], args) => `${renderer.render(f.callee)}(${args.join(", ")})`,
       (f, args) => `${f}(${args.join(", ")})`,
       v => "?" + v.name,
+      aliasResolution
     );
   }
 }
@@ -91,14 +126,17 @@ export function renderNestedList(
   nil_name: string,
   renderer: Renderer<string>,
   join = ', ',
-  app = ' ++ ',
+  // app = ' ++ ',
+  app = (left: string, right: string) => left + ' ++ ' + right,
   lparen = '(',
   rparen = ')',
+  arg_collect = (args: Expr[]) => [args[0], args[1]]
 ): string {
   function collectArgs(e: Expr): [Expr[], Expr] {
     if (e.kind === "app" && e.callee.kind === "const" && e.callee.value === cons_name) {
-      const [xs, end] = collectArgs(e.args[1]);
-      return [[e.args[0], ...xs], end];
+      const [arg, rest] = arg_collect(e.args);
+      const [xs, end] = collectArgs(rest);
+      return [[arg, ...xs], end];
     }
     return [[], e];
   }
@@ -107,7 +145,8 @@ export function renderNestedList(
   if (end.kind === "const" && end.value === nil_name) {
     return body;
   } else {
-    return body + app + renderer.render(end);
+    // return body + app + renderer.render(end);
+    return app(body, renderer.render(end));
   }
 }
 
