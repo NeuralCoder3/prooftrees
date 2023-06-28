@@ -1,6 +1,6 @@
 import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
-import { AppDispatchRenderer, ConstDispatchRenderer, renderNestedList } from '../syntax/renderer';
-import { fun } from '../syntax/syntactic_logic';
+import { AppDispatchRenderer, AppRenderer, ConstDispatchRenderer, renderNestedList, renderNestedListAdvanced } from '../syntax/renderer';
+import { Expr, equalExpr, fun } from '../syntax/syntactic_logic';
 
 export const calculus: inf_calculus = {
   name: "StmtStaticSemantics",
@@ -43,11 +43,16 @@ export const calculus: inf_calculus = {
     }),
     convertStringRule({
       name: "TDecl",
-      conclusion: "prg_typed(?Gamma, Seq(Declare(?t, ?n), ?p))",
+      conclusion: "stmt_typed(?Gamma, Block(Seq(Declare(?t, ?n), ?p)))",
       premises: [
-        "prg_typed(Extend(?t, ?n, ?Gamma), ?p)",
+        "stmt_typed(Extend(?t, ?n, ?Gamma), Block(?p))",
         ["is_type(?t)", "side-condition"],
       ]
+      // conclusion: "prg_typed(?Gamma, Seq(Declare(?t, ?n), ?p))",
+      // premises: [
+      //   "prg_typed(Extend(?t, ?n, ?Gamma), ?p)",
+      //   ["is_type(?t)", "side-condition"],
+      // ]
     }),
     // Program rules
     convertStringRule({
@@ -55,6 +60,7 @@ export const calculus: inf_calculus = {
       conclusion: "stmt_typed(?Gamma, Block(?p))",
       premises: [
         "prg_typed(?Gamma, ?p)",
+        ["not(has_declare(?p))", "side-condition"],
       ]
     }),
     convertStringRule({
@@ -67,14 +73,14 @@ export const calculus: inf_calculus = {
     }),
     convertStringRule({
       name: "TSeq1",
-      conclusion: "prg_typed(?Gamma, Seq(?s, epsilon))",
+      conclusion: "prg_typed(?Gamma, Seq(?s, Term))",
       premises: [
         "stmt_typed(?Gamma, ?s)",
       ]
     }),
     convertStringRule({
       name: "TSeq2",
-      conclusion: "prg_typed(?Gamma, Seq(?s, Seq(?s2, epsilon)))",
+      conclusion: "prg_typed(?Gamma, Seq(?s, Seq(?s2, Term)))",
       premises: [
         "stmt_typed(?Gamma, ?s)",
         "stmt_typed(?Gamma, ?s2)",
@@ -88,33 +94,75 @@ export const calculus: inf_calculus = {
     // }),
     convertStringRule({
       name: "TTerm",
-      conclusion: "prg_typed(?Gamma, epsilon)",
+      conclusion: "prg_typed(?Gamma, Term)",
       premises: [
       ]
     }),
   ]
 };
 
+// simple
+// const envRenderer: AppRenderer<string> = (_, args) => `${args[2]}[${args[0]} ↦ ${args[1]}]`;
+
+// with duplicates
+// const envRenderer: AppRenderer<string> = ([f, renderer], _) =>
+//   renderNestedList(f, "Extend", "emptyEnv", renderer, ", ", (left, right) => right + left, "{", "}",
+//     (args) => [fun("DeclPair", [args[0], args[1]]), args[2]]);
+
+type DeclarationPair = {
+  name: Expr, // or just string
+  type: Expr,
+};
+const mkDeclPair = (name: Expr, type: Expr): DeclarationPair => ({ name, type });
+
+// remove duplicates
+const envRenderer: AppRenderer<string> = ([f, renderer], _) =>
+  renderNestedListAdvanced<DeclarationPair, DeclarationPair[], string>(
+    f,
+    e => {
+      if (e.kind === "app" && e.callee.kind === "const" && e.callee.value === "Extend") {
+        const [type, name, env] = e.args;
+        return [mkDeclPair(name, type), env];
+      } else {
+        return e;
+      }
+    },
+    [],
+    (arg, args) => {
+      return [arg, ...(args.filter(decl => !equalExpr(decl.name, arg.name)))];
+    },
+    (args, end) => {
+      const strRenderer = renderer.render.bind(renderer);
+      const body =
+        "{" + args.map(decl =>
+          strRenderer(fun("DeclPair", [decl.type, decl.name]))
+        ).join(", ") + "}";
+      if (end.kind === "const" && end.value === "emptyEnv") {
+        return body;
+      } else {
+        return body + " " + renderer.render(end);
+      }
+    }
+  );
+
 // couple with stmt renderer and convertible renderer
 export const app_renderer: AppDispatchRenderer<string> = {
   "stmt_typed": (_, args) => `${args[0]} ⊢ ${args[1]}`,
   "prg_typed": (_, args) => `${args[0]} ⊢ ${args[1]}`,
-  "Assign": (_, args) => `${args[0]} := ${args[1]};`,
+  "Assign": (_, args) => `${args[0]} = ${args[1]};`,
   "If": (_, args) => `if (${args[0]}) ${args[1]} else ${args[2]}`,
   "While": (_, args) => `while (${args[0]}) ${args[1]}`,
   "Declare": (_, args) => `${args[0]} ${args[1]};`,
-  // "Extend": (_, args) => `${args[2]}[${args[0]} ↦ ${args[1]}]`,
   "DeclPair": (_, args) => `${args[1]} ↦ ${args[0]}`,
-  "Extend": ([f, renderer], _) => renderNestedList(f, "Extend", "emptyEnv", renderer, ", ", (left, right) => right + left, "{", "}",
-    (args) => [fun("DeclPair", [args[0], args[1]]), args[2]]),
+  "Extend": envRenderer,
   "Block": (_, args) => `{ ${args[0]} }`,
-  "Seq": ([f, renderer], _) => renderNestedList(f, "Seq", "epsilon", renderer, " ", (left, right) => left + " " + right, "", "")
+  "Seq": ([f, renderer], _) => renderNestedList(f, "Seq", "Term", renderer, " ", (left, right) => left + " " + right, "", "")
 
   // temporary
 };
 
 export const const_renderer: ConstDispatchRenderer<string> = {
-  "epsilon": "",
-  "emptyEnv": "{}",
+  "Term": "ε",
+  "emptyEnv": "∅",
   "Abort": "abort();",
 };

@@ -15,6 +15,7 @@ export interface InferenceRule {
   conclusion: logic.Expr;
   premises: Premise[];
   name?: string;
+  // handler?: Conclusion => Premise[] | null;
 }
 
 export interface StringRule {
@@ -82,14 +83,16 @@ export function getFreeVariables(inf: InferenceRule): Set<string> {
 export function applyRuleFull(
   inf: InferenceRule,
   goal: logic.Expr,
-  var_bindings: Subst | null = {} // null => ignore, else needs to bind all free variables
+  var_bindings: Subst | null = {}, // null => ignore, else needs to bind all free variables
+  used_variables: Set<string> = new Set(),
 ): [Premise[], Subst] | null {
   let conclusion = inf.conclusion;
   let premises = inf.premises;
   // name inference rule apart from goal
   const goal_vars = logic.getVars(goal);
+  const bad_vars = new Set([...goal_vars, ...used_variables]);
   const inf_vars = new Set([...logic.getVars(conclusion), ...premiseVariables(inf)]);
-  const subst = logic.nameApart(inf_vars, goal_vars);
+  const subst = logic.nameApart(inf_vars, bad_vars);
   conclusion = applySubst(subst, conclusion);
   premises = premises.map(premise => {
     return {

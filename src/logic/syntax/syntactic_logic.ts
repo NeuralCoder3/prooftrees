@@ -19,7 +19,7 @@ export interface App {
 
 export interface Var {
   kind: "var";
-  name: string;
+  value: string;
 }
 
 export function mkConst(value: string): Const {
@@ -29,7 +29,7 @@ export function mkApp(callee: Expr, args: Expr[]): App {
   return { kind: "app", callee: callee, args: args };
 }
 export function mkVar(name: string): Var {
-  return { kind: "var", name };
+  return { kind: "var", value: name };
 }
 
 export function fun(name: string, args: Expr[]): Expr {
@@ -47,7 +47,7 @@ export function getVars(e: Expr): Set<string> {
           .reduce((acc, s) => new Set([...acc, ...s]), new Set())
       );
     case "var":
-      return new Set([e.name]);
+      return new Set([e.value]);
   }
 }
 
@@ -112,7 +112,7 @@ export function equalExpr(e1: Expr, e2: Expr): boolean {
       );
     case "var":
       assert(e2.kind === "var");
-      return e1.name === e2.name;
+      return e1.value === e2.value;
   }
 }
 
@@ -147,3 +147,11 @@ export function nameApart(variables: Set<string>, vars: Set<string>): Subst {
   }
   return subst;
 }
+
+
+// export type Normalizer<T> = (e: T) => T;
+
+// App(Const name, ...) => apply
+// or if * => always
+export type Normalizer = (e: Expr) => Expr;
+export type Normalizers = { [key: string]: Normalizer };

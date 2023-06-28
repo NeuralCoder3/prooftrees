@@ -12,7 +12,7 @@ export const calculus: inf_calculus = {
     }),
     convertStringRule({
       name: "SMT",
-      conclusion: "?P",
+      conclusion: "smt_guard(?P)",
       premises: []
     }),
     convertStringRule({
@@ -21,7 +21,7 @@ export const calculus: inf_calculus = {
       premises: []
     }),
     convertStringRule({
-      name: "LookupExtend",
+      name: "LookupFirst",
       conclusion: "maps(Extend(?t, ?x, ?Gamma), ?x, ?t)",
       premises: [
       ]
@@ -31,7 +31,23 @@ export const calculus: inf_calculus = {
       conclusion: "maps(Extend(?t2, ?y, ?Gamma), ?x, ?t1)",
       premises: [
         "maps(?Gamma, ?x, ?t1)",
+        "not(equal(?x, ?y))",
       ]
     }),
+    convertStringRule({
+      name: "Test",
+      // apply on ?A = 42
+      // conclusion: "equal(?x, ?x)",
+      conclusion: "equal(add(?x,0), ?x)",
+      premises: []
+    }),
   ]
+};
+
+export const app_renderer: AppDispatchRenderer<string> = {
+  "not": (_, args) => `¬ (${args[0]})`,
+  "equal": (_, args) => `${args[0]} = ${args[1]}`,
+};
+
+export const const_renderer: ConstDispatchRenderer<string> = {
 };

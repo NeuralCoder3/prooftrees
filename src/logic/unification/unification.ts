@@ -45,30 +45,30 @@ export function _unify(e1: Expr, e2: Expr, mgu: Subst | null = {}): Subst | null
 }
 
 function unifyVar(v: Var, e: Expr, mgu: Subst): Subst | null {
-  if (v.name in mgu) {
-    return _unify(mgu[v.name], e, mgu);
+  if (v.value in mgu) {
+    return _unify(mgu[v.value], e, mgu);
   }
-  if (e.kind === "var" && e.name in mgu) {
-    return _unify(v, mgu[e.name], mgu);
+  if (e.kind === "var" && e.value in mgu) {
+    return _unify(v, mgu[e.value], mgu);
   }
-  if (getVars(e).has(v.name)) {
+  if (getVars(e).has(v.value)) {
     return null;
   }
-  return { ...mgu, [v.name]: e };
+  return { ...mgu, [v.value]: e };
 }
 
-export function applySubst(mgu: Subst, e: Expr): Expr {
-  if (e.kind === "var") {
-    if (e.name in mgu) {
-      return mgu[e.name];
+export function applySubst(mgu: Subst, e: Expr, type: "var" | "const" = "var"): Expr {
+  if (e.kind === type) {
+    if (e.value in mgu) {
+      return mgu[e.value];
     }
     return e;
   }
   if (e.kind === "app") {
     return {
       kind: "app",
-      callee: applySubst(mgu, e.callee),
-      args: e.args.map(arg => applySubst(mgu, arg))
+      callee: applySubst(mgu, e.callee, type),
+      args: e.args.map(arg => applySubst(mgu, arg, type))
     };
   }
   return e;

@@ -1,10 +1,10 @@
 import { Fragment, createRef, useEffect, useLayoutEffect, useState } from "react";
 import { Premise, applyRule, Calculus } from "../logic/inference/inference_rules";
-import { Tree, applyNamedRule } from "./Tree";
+import { Tree, applyNamedRule, treeFold } from "./Tree";
 import { assert } from "console";
 import { parse } from "../logic/syntax/parser";
 import { Renderer, StringDispatchRenderer } from "../logic/syntax/renderer";
-import { Expr } from "../logic/syntax/syntactic_logic";
+import { Expr, getVars } from "../logic/syntax/syntactic_logic";
 import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -25,6 +25,7 @@ interface TreeProps {
   update_assumptions: (tree: Tree) => (rule: string | undefined, assumptions: Premise[]) => void;
   propagateSubst: (subst: Subst) => void;
   locked?: boolean;
+  used_vars: Set<string>;
 }
 
 
@@ -42,10 +43,20 @@ export const TreeComponent = (props: TreeProps) => {
 
   const handleRule = (ruleName: string) => {
     const goal = props.tree.conclusion;
+    // const used_vars_list = treeFold<string[]>(props.tree, (e: Expr, ass_accs: string[][]) => {
+    //   const concl_vars = getVars(e);
+    //   return [
+    //     ...concl_vars,
+    //     ...(ass_accs.flat())
+    //   ];
+    // });
+    // const used_vars = new Set(used_vars_list);
+    // console.log("Used variables: ", used_vars);
+
     try {
       const token = props.capture();
       setUndoToken(token);
-      const [assumptions, subst] = applyNamedRule(props.calculus, ruleName, goal);
+      const [assumptions, subst] = applyNamedRule(props.calculus, ruleName, goal, props.used_vars);
       // const assumptions = assumption_exprs.map(a => renderer.render(a));
       // console.log(renderSubst(subst, props.renderer));
       props.update_assumptions(props.tree)(ruleName, assumptions);
@@ -104,19 +115,32 @@ export const TreeComponent = (props: TreeProps) => {
                   ({ value: rule.name, label: rule.name })
                 )
               }
+
+
+
               className={
                 hadError ? "error" : ""
               }
 
+              // minWidth = width of largest option
               // red background on error
               styles={{
-                control: (provided, state) =>
-                  hadError ?
-                    ({
-                      ...provided,
+                control: (provided, state) => {
+                  const max_width = 4 + Math.max(...props.calculus.rules.map(r => r.name?.length || 0));
+
+                  let style = {
+                    ...provided,
+                    // minWidth: "fit-content",
+                    minWidth: `${max_width}ch`,
+                  };
+                  if (hadError)
+                    style = {
+                      ...style,
                       backgroundColor: "rgba(255, 72, 26, 0.4)",
-                    })
-                    : provided,
+                    };
+
+                  return style;
+                }
               }}
 
               onChange={(e) => {
@@ -128,6 +152,7 @@ export const TreeComponent = (props: TreeProps) => {
               onInputChange={(e) => { }}
               onMenuClose={() => { }}
               onMenuOpen={() => { }}
+
             />
           )
       }
@@ -160,6 +185,7 @@ export const TreeComponent = (props: TreeProps) => {
                         calculus={props.calculus} update_assumptions={props.update_assumptions} renderer={props.renderer}
                         propagateSubst={props.propagateSubst} restore={props.restore} capture={props.capture}
                         options={props.options}
+                        used_vars={props.used_vars}
                       />
                     </div>
                     <div className="small_spacer" />

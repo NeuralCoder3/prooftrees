@@ -113,12 +113,36 @@ export class StringDispatchRenderer extends DispatchRenderer<string> {
       c => c.value,
       ([f, renderer], args) => `${renderer.render(f.callee)}(${args.join(", ")})`,
       (f, args) => `${f}(${args.join(", ")})`,
-      v => "?" + v.name,
+      v => "?" + v.value,
       aliasResolution
     );
   }
 }
 
+
+// V = extracted arguments
+// T = collected arguments
+// U = output
+export function renderNestedListAdvanced<V, T, U>(
+  e: Expr,
+  getArg: (e: Expr) => [V, Expr] | Expr,
+  empty: T,
+  combine: (arg: V, args: T) => T,
+  postprocess: (t: T, end: Expr) => U,
+): U {
+  function collectArgs(e: Expr): [T, Expr] {
+    const res = getArg(e);
+    if (res instanceof Array) {
+      const [arg, rest] = res;
+      const [acc, end] = collectArgs(rest);
+      return [combine(arg, acc), end];
+    } else {
+      return [empty, res];
+    }
+  }
+  const [args, end] = collectArgs(e);
+  return postprocess(args, end);
+}
 
 export function renderNestedList(
   e: Expr,
@@ -132,22 +156,30 @@ export function renderNestedList(
   rparen = ')',
   arg_collect = (args: Expr[]) => [args[0], args[1]]
 ): string {
-  function collectArgs(e: Expr): [Expr[], Expr] {
-    if (e.kind === "app" && e.callee.kind === "const" && e.callee.value === cons_name) {
-      const [arg, rest] = arg_collect(e.args);
-      const [xs, end] = collectArgs(rest);
-      return [[arg, ...xs], end];
+  const s = renderNestedListAdvanced<Expr, Expr[], string>(
+    e,
+    e => {
+      if (e.kind === "app" && e.callee.kind === "const" && e.callee.value === cons_name) {
+        return arg_collect(e.args) as [Expr, Expr];
+      } else {
+        return e;
+      }
+    },
+    [],
+    (arg, args) => [arg, ...args],
+    (args, end) => {
+      const body =
+        // (custom_nil !== null && args.length === 0) ? custom_nil :
+        lparen + args.map(renderer.render.bind(renderer)).join(join) + rparen;
+      if (end.kind === "const" && end.value === nil_name) {
+        return body;
+      } else {
+        // return body + app + renderer.render(end);
+        return app(body, renderer.render(end));
+      }
     }
-    return [[], e];
-  }
-  const [xs, end] = collectArgs(e);
-  const body = lparen + xs.map(renderer.render.bind(renderer)).join(join) + rparen;
-  if (end.kind === "const" && end.value === nil_name) {
-    return body;
-  } else {
-    // return body + app + renderer.render(end);
-    return app(body, renderer.render(end));
-  }
+  );
+  return s;
 }
 
 
