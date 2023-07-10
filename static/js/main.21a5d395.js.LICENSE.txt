@@ -5,6 +5,8 @@
  * @license  MIT
  */
 
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
 /**
  * @license React
  * react-dom.production.min.js
@@ -56,7 +58,7 @@
  */
 
 /**
- * @mui/styled-engine v5.12.0
+ * @mui/styled-engine v5.13.2
  *
  * @license MIT
  * This source code is licensed under the MIT license found in the
