@@ -5,6 +5,7 @@ import * as expr_ty from "../logic/calculi/static_semantics_expr";
 import * as stmt_ty from "../logic/calculi/static_semantics_stmt";
 import * as meta from "../logic/calculi/meta";
 import * as hoare from "../logic/calculi/hoare";
+import * as prog1_static from "../logic/calculi/static_prog1";
 import { StringDispatchRenderer } from '../logic/syntax/renderer';
 import React, { useEffect, useState } from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
@@ -58,20 +59,23 @@ const normalizationMaps: Normalizers[] = [
 // ))
 // `.replaceAll("\n", "");
 const goal =
-  ` stmt_typed(emptyEnv, 
-    Block(
-        Seq(
-            Declare(int, x),
-        Seq(
-            Declare(int, y),
-        Seq(
-            Declare(float, x),
-        Seq(
-            Assign(x, 3),
-            Term
-        ))))
-    )
-) `
+`
+typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), int)
+`
+//   ` stmt_typed(emptyEnv, 
+//     Block(
+//         Seq(
+//             Declare(int, x),
+//         Seq(
+//             Declare(int, y),
+//         Seq(
+//             Declare(float, x),
+//         Seq(
+//             Assign(x, 3),
+//             Term
+//         ))))
+//     )
+// ) `
   // ` stmt_typed(emptyEnv, 
   //     Block(
   //         Seq(
@@ -232,6 +236,7 @@ export function InferenceInterface() {
     .registerAppDispatcher(stmt_ty.app_renderer).registerConstDispatcher(stmt_ty.const_renderer)
     .registerAppDispatcher(meta.app_renderer).registerConstDispatcher(meta.const_renderer)
     .registerAppDispatcher(hoare.app_renderer).registerConstDispatcher(hoare.const_renderer)
+    .registerAppDispatcher(prog1_static.app_renderer).registerConstDispatcher(prog1_static.const_renderer)
     ;
 
   const usedRenderer = (withAlias: boolean) => {

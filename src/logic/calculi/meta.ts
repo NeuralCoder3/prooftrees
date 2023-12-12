@@ -22,31 +22,33 @@ export const calculus: inf_calculus = {
     }),
     convertStringRule({
       name: "LookupFirst",
-      conclusion: "maps(Extend(?t, ?x, ?Gamma), ?x, ?t)",
+      conclusion: "maps(Extend(?t, ?x, ?E), ?x, ?t)",
       premises: [
       ]
     }),
     convertStringRule({
       name: "LookupSkip",
-      conclusion: "maps(Extend(?t2, ?y, ?Gamma), ?x, ?t1)",
+      conclusion: "maps(Extend(?t2, ?y, ?E), ?x, ?t1)",
       premises: [
-        "maps(?Gamma, ?x, ?t1)",
+        "maps(?E, ?x, ?t1)",
         "not(equal(?x, ?y))",
       ]
     }),
-    convertStringRule({
-      name: "Test",
-      // apply on ?A = 42
-      // conclusion: "equal(?x, ?x)",
-      conclusion: "equal(add(?x,0), ?x)",
-      premises: []
-    }),
+    // convertStringRule({
+    //   name: "Test",
+    //   // apply on ?A = 42
+    //   // conclusion: "equal(?x, ?x)",
+    //   conclusion: "equal(add(?x,0), ?x)",
+    //   premises: []
+    // }),
   ]
 };
 
 export const app_renderer: AppDispatchRenderer<string> = {
   "not": (_, args) => `¬ (${args[0]})`,
   "equal": (_, args) => `${args[0]} = ${args[1]}`,
+  "maps": (_, args) => `(${args[1]} : ${args[2]}) ∈ ${args[0]}`,
+  "Extend": (_, args) => `${args[2]}, ${args[1]} : ${args[0]}`,
 };
 
 export const const_renderer: ConstDispatchRenderer<string> = {

@@ -125,6 +125,7 @@ export const TreeComponent = (props: TreeProps) => {
               // minWidth = width of largest option
               // red background on error
               styles={{
+                // @ts-ignore
                 control: (provided, state) => {
                   const max_width = 4 + Math.max(...props.calculus.rules.map(r => r.name?.length || 0));
 
@@ -140,7 +141,15 @@ export const TreeComponent = (props: TreeProps) => {
                     };
 
                   return style;
-                }
+                },
+                // @ts-ignore
+                menu: (base) => ({
+                      ...base,
+                      width: "max-content",
+                      minWidth: "100%"
+                }),
+                
+
               }}
 
               onChange={(e) => {

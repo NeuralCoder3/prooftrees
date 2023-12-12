@@ -3,13 +3,16 @@ import * as expr_ty from "../logic/calculi/static_semantics_expr";
 import * as stmt_ty from "../logic/calculi/static_semantics_stmt";
 import * as meta from "../logic/calculi/meta";
 import * as hoare from "../logic/calculi/hoare";
+import * as prog1_static from "../logic/calculi/static_prog1";
+
 
 export const calculiList = [
   meta.calculus,
-  type_conversion.calculus,
-  expr_ty.calculus,
-  stmt_ty.calculus,
-  hoare.calculus,
+  prog1_static.calculus,
+  // type_conversion.calculus,
+  // expr_ty.calculus,
+  // stmt_ty.calculus,
+  // hoare.calculus,
 ];
 
 export let default_options = {
@@ -18,7 +21,7 @@ export let default_options = {
   tree: (undefined as undefined | string),
   offset: ("center" as "0,0" | "center"),
   scale: 1.0,
-  calculus: "meta",
+  calculus: "prog1static,meta",
 
   highlight: true,
   showSideConditions: false,
