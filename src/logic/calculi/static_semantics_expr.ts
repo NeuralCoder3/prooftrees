@@ -64,6 +64,8 @@ export const app_renderer: AppDispatchRenderer<string> = {
   "maps": (_, args) => `${args[0]} ${args[1]} = ${args[2]}`,
   "is_bound": (_, args) => `-2³¹ ≤ ${args[0]} < 2³¹`,
   "BinOp": (_, args) => `${args[1]} ${args[0]} ${args[2]}`,
+  "UnOp": (_, args) => `${args[0]} ${args[1]}`,
+  "UnaryOp": (_, args) => `${args[0]} ${args[1]}`, // for completeness
   "Indir": (_, args) => `*${args[0]}`,
   "Addr": (_, args) => `&${args[0]}`,
 
@@ -86,6 +88,7 @@ export const const_renderer: ConstDispatchRenderer<string> = {
   "GreaterEqual": "≥",
   "Div": "/",
   "Mul": "*",
-  // "Addr": "&",
-  // "Indir": "*",
+
+  "Addr": "&",
+  "Indir": "*",
 };

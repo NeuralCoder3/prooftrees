@@ -71,18 +71,18 @@ export const calculus: inf_calculus = {
       name: "HConsequenceStmt",
       conclusion: "stmt_hoare(?P', ?s, ?Q')",
       premises: [
-        "implies(?P, ?P')",
+        "implies(?P', ?P)",
         "stmt_hoare(?P, ?s, ?Q)",
-        "implies(?Q', ?Q)",
+        "implies(?Q, ?Q')",
       ]
     }),
     convertStringRule({
       name: "HConsequencePrg",
       conclusion: "prg_hoare(?P', ?p, ?Q')",
       premises: [
-        "implies(?P, ?P')",
+        "implies(?P', ?P)",
         "prg_hoare(?P, ?p, ?Q)",
-        "implies(?Q', ?Q)",
+        "implies(?Q, ?Q')",
       ]
     }),
     convertStringRule({
