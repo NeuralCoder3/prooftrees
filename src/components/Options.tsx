@@ -9,10 +9,10 @@ import * as prog1_static from "../logic/calculi/static_prog1";
 export const calculiList = [
   meta.calculus,
   prog1_static.calculus,
-  // type_conversion.calculus,
-  // expr_ty.calculus,
-  // stmt_ty.calculus,
-  // hoare.calculus,
+  type_conversion.calculus,
+  expr_ty.calculus,
+  stmt_ty.calculus,
+  hoare.calculus,
 ];
 
 export let default_options = {

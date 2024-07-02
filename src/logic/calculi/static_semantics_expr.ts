@@ -76,4 +76,16 @@ export const app_renderer: AppDispatchRenderer<string> = {
 export const const_renderer: ConstDispatchRenderer<string> = {
   "Plus": "+",
   "Minus": "-",
+  
+  "UnEqual": "!=",
+  // "Unequal": "!=",
+  "Equal": "==",
+  "Less": "<",
+  "LessEqual": "≤",
+  "Greater": ">",
+  "GreaterEqual": "≥",
+  "Div": "/",
+  "Mul": "*",
+  // "Addr": "&",
+  // "Indir": "*",
 };
