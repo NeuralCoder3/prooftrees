@@ -463,6 +463,11 @@ export function InferenceInterface() {
 
                   </div>
                 }
+                {options.showButtons &&
+                  <div className="UIButtons">
+                    <a href="https://github.com/NeuralCoder3/prooftrees/issues">Feedback, Questions, Suggestions? Click here (PRs welcome)</a>
+                  </div>
+                }
               </div>
               <TransformWrapper
                 initialScale={options.scale}
