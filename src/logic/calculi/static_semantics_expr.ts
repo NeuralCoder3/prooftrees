@@ -1,5 +1,5 @@
 import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
-import { AppDispatchRenderer, ConstDispatchRenderer } from '../syntax/renderer';
+import { AppDispatchRenderer, AppRenderer, ConstDispatchRenderer } from '../syntax/renderer';
 import { renderer as type_app_renderer } from './type_conversion';
 
 export const calculus: inf_calculus = {
@@ -58,12 +58,41 @@ export const calculus: inf_calculus = {
   ]
 };
 
+const binopRenderer : AppRenderer<string> = ([f,renderer], args) => {
+  let [op_str, e1_str, e2_str] = args;
+  // if mul operation
+  if(f.args[0].kind === "const" &&
+    (f.args[0].value === "Mul" || f.args[0].value === "Div")
+  ) {
+    // if e1 is a binop with a plus operation
+    const e1 = f.args[1];
+    if(e1.kind === "app" &&
+      e1.callee.kind === "const" &&
+      e1.callee.value === "BinOp" &&
+      e1.args[0].kind === "const" &&
+      (e1.args[0].value === "Add" || e1.args[0].value === "Sub")) {
+      e1_str = `(${e1_str})`;
+    }
+    // same for e2
+    const e2 = f.args[2];
+    if(e2.kind === "app" &&
+      e2.callee.kind === "const" &&
+      e2.callee.value === "BinOp" &&
+      e2.args[0].kind === "const" &&
+      (e2.args[0].value === "Add" || e2.args[0].value === "Sub")) {
+      e2_str = `(${e2_str})`;
+    }
+  }
+  return `${e1_str} ${op_str} ${e2_str}`;
+};
+
 export const app_renderer: AppDispatchRenderer<string> = {
   ...type_app_renderer,
   "typed": (_, args) => `${args[0]} ⊢ ${args[1]} : ${args[2]}`,
   "maps": (_, args) => `${args[0]} ${args[1]} = ${args[2]}`,
   "is_bound": (_, args) => `-2³¹ ≤ ${args[0]} < 2³¹`,
-  "BinOp": (_, args) => `${args[1]} ${args[0]} ${args[2]}`,
+  // "BinOp": (_, args) => `${args[1]} ${args[0]} ${args[2]}`,
+  "BinOp": binopRenderer,
   "UnOp": (_, args) => `${args[0]} ${args[1]}`,
   "UnaryOp": (_, args) => `${args[0]} ${args[1]}`, // for completeness
   "Indir": (_, args) => `*${args[0]}`,
@@ -88,6 +117,8 @@ export const const_renderer: ConstDispatchRenderer<string> = {
   "GreaterEqual": "≥",
   "Div": "/",
   "Mul": "*",
+  "Add": "+",
+  "Sub": "-",
 
   "Addr": "&",
   "Indir": "*",
