@@ -5,16 +5,16 @@ import { renderer as type_app_renderer } from './type_conversion';
 export const calculus: inf_calculus = {
   name: "Meta",
   rules: [
-    convertStringRule({
-      name: "Auto",
-      conclusion: "?P",
-      premises: []
-    }),
-    convertStringRule({
-      name: "SMT",
-      conclusion: "smt_guard(?P)",
-      premises: []
-    }),
+    // convertStringRule({
+    //   name: "Auto",
+    //   conclusion: "?P",
+    //   premises: []
+    // }),
+    // convertStringRule({
+    //   name: "SMT",
+    //   conclusion: "smt_guard(?P)",
+    //   premises: []
+    // }),
     convertStringRule({
       name: "Admit",
       conclusion: "?P",
