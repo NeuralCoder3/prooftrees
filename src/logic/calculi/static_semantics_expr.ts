@@ -70,7 +70,8 @@ const binopRenderer : AppRenderer<string> = ([f,renderer], args) => {
       e1.callee.kind === "const" &&
       e1.callee.value === "BinOp" &&
       e1.args[0].kind === "const" &&
-      (e1.args[0].value === "Add" || e1.args[0].value === "Sub")) {
+      (e1.args[0].value === "Add" || e1.args[0].value === "Sub" ||
+        e1.args[0].value === "Plus" || e1.args[0].value === "Minus")) {
       e1_str = `(${e1_str})`;
     }
     // same for e2
@@ -79,7 +80,8 @@ const binopRenderer : AppRenderer<string> = ([f,renderer], args) => {
       e2.callee.kind === "const" &&
       e2.callee.value === "BinOp" &&
       e2.args[0].kind === "const" &&
-      (e2.args[0].value === "Add" || e2.args[0].value === "Sub")) {
+      (e2.args[0].value === "Add" || e2.args[0].value === "Sub" || 
+        e2.args[0].value === "Plus" || e2.args[0].value === "Minus")) {
       e2_str = `(${e2_str})`;
     }
   }

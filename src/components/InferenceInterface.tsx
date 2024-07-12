@@ -60,8 +60,11 @@ const normalizationMaps: Normalizers[] = [
 // `.replaceAll("\n", "");
 const goal =
 `
-typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), int)
+typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), ?T)
 `
+// `
+// typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), int)
+// `
 //   ` stmt_typed(emptyEnv, 
 //     Block(
 //         Seq(
