@@ -1,4 +1,4 @@
-import { App, Const, Expr, Var, equalExpr, replaceInExpr } from "./syntactic_logic";
+import { App, Const, Expr, Var, equalExpr, fun, replaceInExpr } from "./syntactic_logic";
 
 export abstract class Renderer<T> {
   abstract render(e: Expr): T;
@@ -182,4 +182,40 @@ export function renderNestedList(
   return s;
 }
 
+type KeyValuePair = {
+  key: Expr, // or just string
+  value: Expr,
+};
+const mkDeclPair = (key: Expr, value: Expr): KeyValuePair => ({ key: key, value: value });
 
+// remove duplicates
+export const envRenderer =
+  (nilName: string, ctor: string, mapping: string) =>
+    (([f, renderer], _) =>
+      renderNestedListAdvanced<KeyValuePair, KeyValuePair[], string>(
+        f,
+        e => {
+          if (e.kind === "app" && e.callee.kind === "const" && e.callee.value === ctor) {
+            const [type, name, env] = e.args;
+            return [mkDeclPair(name, type), env];
+          } else {
+            return e;
+          }
+        },
+        [],
+        (arg, args) => {
+          return [arg, ...(args.filter(decl => !equalExpr(decl.key, arg.key)))];
+        },
+        (args, end) => {
+          const strRenderer = renderer.render.bind(renderer);
+          const body =
+            "{" + args.map(decl =>
+              strRenderer(fun(mapping, [decl.value, decl.key]))
+            ).join(", ") + "}";
+          if (end.kind === "const" && end.value === nilName) {
+            return body;
+          } else {
+            return body + " " + renderer.render(end);
+          }
+        }
+      )) as AppRenderer<string>;

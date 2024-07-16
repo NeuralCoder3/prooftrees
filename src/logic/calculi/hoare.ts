@@ -13,6 +13,16 @@ export const calculus: inf_calculus = {
     }),
     convertStringRule({
       name: "HAssign",
+      conclusion: "stmt_hoare(subst(?Q, ?x, ?e), Assign(?x, ?e), ?Q)",
+      // conclusion: "stmt_hoare(and(defined(?e), ?Q'), Assign(?x, ?e), ?Q)",
+      premises: [
+        // or inline
+        // "Define(?Q', subst(?Q, ?x, ?e))",
+        ["is_var(?x)", "side-condition"],
+      ]
+    }),
+    convertStringRule({
+      name: "HAssignDef",
       conclusion: "stmt_hoare(and(defined(?e), subst(?Q, ?x, ?e)), Assign(?x, ?e), ?Q)",
       // conclusion: "stmt_hoare(and(defined(?e), ?Q'), Assign(?x, ?e), ?Q)",
       premises: [

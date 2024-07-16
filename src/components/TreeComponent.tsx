@@ -208,7 +208,9 @@ export const TreeComponent = (props: TreeProps) => {
           </>
         }
         <div className="nobreak_center">
-          {props.renderer.render(props.tree.conclusion)}
+          {/* {props.renderer.render(props.tree.conclusion)} */}
+          {/* allow for html */}
+          <div dangerouslySetInnerHTML={{ __html: props.renderer.render(props.tree.conclusion) }} />
           <div className="spacer" style={{
             width: spacerWidth
           }} />

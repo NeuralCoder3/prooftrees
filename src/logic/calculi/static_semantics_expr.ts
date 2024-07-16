@@ -62,8 +62,8 @@ const binopRenderer : AppRenderer<string> = ([f,renderer], args) => {
   let [op_str, e1_str, e2_str] = args;
   // if mul operation
   if(f.args[0].kind === "const" &&
-    (f.args[0].value === "Mul" || f.args[0].value === "Div")
-  ) {
+    (f.args[0].value === "Mul" || f.args[0].value === "Div" ||
+      f.args[0].value === "Mult")) {
     // if e1 is a binop with a plus operation
     const e1 = f.args[1];
     if(e1.kind === "app" &&
@@ -117,10 +117,16 @@ export const const_renderer: ConstDispatchRenderer<string> = {
   "LessEqual": "≤",
   "Greater": ">",
   "GreaterEqual": "≥",
+  "Lt": "<",
+  "Gt": ">",
+  "Leq": "≤",
+  "Geq": "≥",
   "Div": "/",
   "Mul": "*",
+  "Mult": "*",
   "Add": "+",
   "Sub": "-",
+  "And": "∧",
 
   "Addr": "&",
   "Indir": "*",

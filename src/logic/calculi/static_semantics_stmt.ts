@@ -1,5 +1,5 @@
 import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
-import { AppDispatchRenderer, AppRenderer, ConstDispatchRenderer, renderNestedList, renderNestedListAdvanced } from '../syntax/renderer';
+import { AppDispatchRenderer, AppRenderer, ConstDispatchRenderer, envRenderer, renderNestedList, renderNestedListAdvanced } from '../syntax/renderer';
 import { Expr, equalExpr, fun } from '../syntax/syntactic_logic';
 
 export const calculus: inf_calculus = {
@@ -109,41 +109,6 @@ export const calculus: inf_calculus = {
 //   renderNestedList(f, "Extend", "emptyEnv", renderer, ", ", (left, right) => right + left, "{", "}",
 //     (args) => [fun("DeclPair", [args[0], args[1]]), args[2]]);
 
-type DeclarationPair = {
-  name: Expr, // or just string
-  type: Expr,
-};
-const mkDeclPair = (name: Expr, type: Expr): DeclarationPair => ({ name, type });
-
-// remove duplicates
-const envRenderer: AppRenderer<string> = ([f, renderer], _) =>
-  renderNestedListAdvanced<DeclarationPair, DeclarationPair[], string>(
-    f,
-    e => {
-      if (e.kind === "app" && e.callee.kind === "const" && e.callee.value === "Extend") {
-        const [type, name, env] = e.args;
-        return [mkDeclPair(name, type), env];
-      } else {
-        return e;
-      }
-    },
-    [],
-    (arg, args) => {
-      return [arg, ...(args.filter(decl => !equalExpr(decl.name, arg.name)))];
-    },
-    (args, end) => {
-      const strRenderer = renderer.render.bind(renderer);
-      const body =
-        "{" + args.map(decl =>
-          strRenderer(fun("DeclPair", [decl.type, decl.name]))
-        ).join(", ") + "}";
-      if (end.kind === "const" && end.value === "emptyEnv") {
-        return body;
-      } else {
-        return body + " " + renderer.render(end);
-      }
-    }
-  );
 
 // couple with stmt renderer and convertible renderer
 export const app_renderer: AppDispatchRenderer<string> = {
@@ -154,7 +119,8 @@ export const app_renderer: AppDispatchRenderer<string> = {
   "While": (_, args) => `while (${args[0]}) ${args[1]}`,
   "Declare": (_, args) => `${args[0]} ${args[1]};`,
   "DeclPair": (_, args) => `${args[1]} ↦ ${args[0]}`,
-  "Extend": envRenderer,
+  "Maps": (_, args) => `${args[1]} ↦ ${args[0]}`,
+  "Extend": envRenderer("emptyEnv", "Extend", "DeclPair"),
   "Block": (_, args) => `{ ${args[0]} }`,
   "Seq": ([f, renderer], _) => renderNestedList(f, "Seq", "Term", renderer, " ", (left, right) => left + " " + right, "", "")
 

@@ -155,3 +155,18 @@ export function nameApart(variables: Set<string>, vars: Set<string>): Subst {
 // or if * => always
 export type Normalizer = (e: Expr) => Expr;
 export type Normalizers = { [key: string]: Normalizer };
+export const mapNormalizer =
+  (map: { [key: string]: string }): Normalizer =>
+    (expr: Expr): Expr => {
+      const app = expr as App;
+      const [o] = app.args;
+
+      if (o.kind !== "const")
+        return expr;
+
+      const out = map[o.value];
+      if (out === undefined)
+        return expr;
+      return mkConst(out);
+    };
+;

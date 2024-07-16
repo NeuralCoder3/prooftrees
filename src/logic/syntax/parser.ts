@@ -1,7 +1,9 @@
 import { Expr, mkApp, mkConst, mkVar } from "./syntactic_logic";
 
 
-const ident_pattern = /([a-z0-9_A-ZΓ']+)/;
+// const ident_pattern = /([a-z0-9_A-ZΓ']+)/;
+// const ident_pattern = /([a-z0-9_A-ZΓ'$]+)/;
+const ident_pattern = /([^ \t\n\r\(\)\s,]+)/;
 // f(a, ?x, 0) => App(Const("f"), [Const("a"), Var("x"), Const("0")])
 function parseIdent(s: string): [string, string] {
   const match = ident_pattern.exec(s);

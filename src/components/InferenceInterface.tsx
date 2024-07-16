@@ -5,28 +5,30 @@ import * as expr_ty from "../logic/calculi/static_semantics_expr";
 import * as stmt_ty from "../logic/calculi/static_semantics_stmt";
 import * as meta from "../logic/calculi/meta";
 import * as hoare from "../logic/calculi/hoare";
+import * as code_gen from "../logic/calculi/code_gen";
 import * as prog1_static from "../logic/calculi/static_prog1";
 import { StringDispatchRenderer } from '../logic/syntax/renderer';
 import React, { useEffect, useState } from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { Options, calculiList, default_options } from './Options';
+import { Options, calculiList, default_options, normalizationMaps } from './Options';
 import { Calculus, combineCalculus, valuePremise } from '../logic/inference/inference_rules';
 import { parse } from '../logic/syntax/parser';
-import { Expr, Normalizer, Normalizers, mkApp } from '../logic/syntax/syntactic_logic';
+import { Expr, Normalizer, Normalizers, getVars, mkApp } from '../logic/syntax/syntactic_logic';
 import './InferenceInterface.css';
 import { AliasTable } from './AliasTable';
 import { CalculusTable } from './CalculusTable';
 import Split from '@uiw/react-split';
-import { Tree, stringTreeToTree, StringTree, goal_tree, treeToStringTree } from './Tree';
-import { Button, IconButton } from '@mui/material';
+import { Tree, stringTreeToTree, StringTree, goal_tree, treeToStringTree, treeFold, treeMap } from './Tree';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, TextField } from '@mui/material';
 import { InputDialog } from './InputDialog';
+import { Subst, applySubst } from '../logic/unification/unification';
 // import { PaneDirective, PanesDirective, SplitterComponent } from '@syncfusion/ej2-react-layouts';
 // import { ReflexContainer, ReflexElement } from 'react-reflex';
 
 
-const normalizationMaps: Normalizers[] = [
-  hoare.normalizers,
-]
+// const normalizationMaps: Normalizers[] = [
+//   hoare.normalizers,
+// ]
 // const calculus = color.calculus;
 // const renderer = new StringDispatchRenderer();
 // const goal = "Brown";
@@ -59,26 +61,26 @@ const normalizationMaps: Normalizers[] = [
 // ))
 // `.replaceAll("\n", "");
 const goal =
-`
+  `
 typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), ?T)
 `
-// `
-// typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), int)
-// `
-//   ` stmt_typed(emptyEnv, 
-//     Block(
-//         Seq(
-//             Declare(int, x),
-//         Seq(
-//             Declare(int, y),
-//         Seq(
-//             Declare(float, x),
-//         Seq(
-//             Assign(x, 3),
-//             Term
-//         ))))
-//     )
-// ) `
+  // `
+  // typed(Extend(int, x, Extend(bool, y, Empty)), If(Id(y), Id(x), Const(0)), int)
+  // `
+  //   ` stmt_typed(emptyEnv, 
+  //     Block(
+  //         Seq(
+  //             Declare(int, x),
+  //         Seq(
+  //             Declare(int, y),
+  //         Seq(
+  //             Declare(float, x),
+  //         Seq(
+  //             Assign(x, 3),
+  //             Term
+  //         ))))
+  //     )
+  // ) `
   // ` stmt_typed(emptyEnv, 
   //     Block(
   //         Seq(
@@ -234,12 +236,14 @@ export function InferenceInterface() {
 
   const [aliases, setAliases] = React.useState<[Expr, Expr][]>(initialAliases);
 
+  // TODO: auto collect
   const prettyRendererGenerator = (showAlias: boolean) => new StringDispatchRenderer(showAlias ? aliases : [])
     .registerAppDispatcher(expr_ty.app_renderer).registerConstDispatcher(expr_ty.const_renderer)
     .registerAppDispatcher(stmt_ty.app_renderer).registerConstDispatcher(stmt_ty.const_renderer)
     .registerAppDispatcher(meta.app_renderer).registerConstDispatcher(meta.const_renderer)
     .registerAppDispatcher(hoare.app_renderer).registerConstDispatcher(hoare.const_renderer)
     .registerAppDispatcher(prog1_static.app_renderer).registerConstDispatcher(prog1_static.const_renderer)
+    .registerAppDispatcher(code_gen.app_renderer).registerConstDispatcher(code_gen.const_renderer)
     ;
 
   const usedRenderer = (withAlias: boolean) => {
@@ -252,7 +256,8 @@ export function InferenceInterface() {
   try {
     initialCalculus = combineCalculus(
       options.calculus.split(
-        /[\s,]+/
+        // /[\s,]+/
+        /[\s,+]+/
       ).map((name) => {
         const calculus = calculiList.find((c) => c.name.toLowerCase() === name.toLowerCase());
         if (!calculus) {
@@ -325,6 +330,87 @@ export function InferenceInterface() {
       console.log("Exported tree: ", treeLink("tree"));
     };
   });
+
+
+  const [openInstantiationDialog, setOpenInstantiationDialog] = React.useState(false);
+  const [instantiationMap, setInstantiationMap] = React.useState<{ [key: string]: string }>({});
+  const openInstantiation = () => {
+    setOpenInstantiationDialog(true);
+    // clear instantiation map from variables that are not in the tree
+    setInstantiationMap((prev) => {
+      const newMap = { ...prev };
+      Object.keys(newMap).forEach((key) => {
+        if (!treeVariables.includes(key)) {
+          delete newMap[key];
+        }
+      });
+      return newMap;
+    });
+  };
+  const treeVariableList = treeFold<string[]>(tree, (node, accs) => {
+    // combine all accs into one list
+    const acc = accs.reduce((acc, curr) => acc.concat(curr), []);
+    getVars(node).forEach((v: string) => {
+      if (!acc.includes(v))
+        acc.push(v);
+    });
+    return acc;
+  });
+  // remove duplicates
+  const treeVariables = [...new Set(treeVariableList)];
+
+  const instantiationDialog = (
+    <Dialog open={openInstantiationDialog} onClose={() => setOpenInstantiationDialog(false)}
+      maxWidth="lg"
+      fullWidth={true}
+    >
+      <DialogTitle>Variable Instantiation</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Please enter the instantiation for the variables in the plain text format:
+        </DialogContentText>
+        {
+          // table with all variables and fields to enter them
+          treeVariables.map((v) => {
+            return (
+              <TextField
+                key={v}
+                label={v + (instantiationMap[v] ? " = " + usedRenderer(true).render(parse(instantiationMap[v])) : "")}
+                value={instantiationMap[v] || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setInstantiationMap((prev) => {
+                    const new_map = { ...prev };
+                    new_map[v] = value;
+                    return new_map;
+                  });
+                }}
+                fullWidth
+              />
+            );
+          })
+        }
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={() => {
+            const subst: Subst = {};
+            for (const key in instantiationMap) {
+              const value = instantiationMap[key];
+              if (value) {
+                subst[key] = parse(value);
+              }
+            }
+            setTree((prev) => treeMap(prev, (node) => applySubst(subst, node)));
+            setOpenInstantiationDialog(false);
+          }}
+        >
+          Submit
+        </Button>
+        <Button onClick={() => setOpenInstantiationDialog(false)}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   return (
     <>
@@ -417,10 +503,10 @@ export function InferenceInterface() {
                       }
                       defaultValue={JSON.stringify(treeToStringTree(tree))}
                       onConfirm={(new_tree) => {
-                        const current_tree = JSON.stringify(treeToStringTree(tree));
-                        if (current_tree === new_tree) {
-                          return null;
-                        }
+                        // const current_tree = JSON.stringify(treeToStringTree(tree));
+                        // if (current_tree === new_tree) {
+                        //   return null;
+                        // }
                         try {
                           const newTree = stringTreeToTree(JSON.parse(new_tree) as StringTree);
                           setTree(newTree);
@@ -463,6 +549,15 @@ export function InferenceInterface() {
                       }}
                       readonly={false}
                     />
+
+                    <Button
+                      onClick={() => {
+                        openInstantiation();
+                      }}
+                    >
+                      Instantiate Variable
+                    </Button>
+                    {instantiationDialog}
 
                   </div>
                 }

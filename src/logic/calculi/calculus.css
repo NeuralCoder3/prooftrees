@@ -1,0 +1,10 @@
+.codebox {
+  border: 1px solid #ccc;
+  /* do not move div to new line */
+  white-space: nowrap;
+  /* make div scrollable */
+  overflow: auto;
+  max-height: 100px;
+  /* align left */
+  text-align: left;
+}

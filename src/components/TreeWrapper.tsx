@@ -8,6 +8,7 @@ import { Subst, applySubst } from "../logic/unification/unification";
 import "./tree.css";
 import { Options } from "./Options";
 import { Expr, getVars } from "../logic/syntax/syntactic_logic";
+import "../logic/calculi/calculus.css";
 
 // TODO: make opaque
 export type timeToken = Tree;
