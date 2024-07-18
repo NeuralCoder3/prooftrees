@@ -29,7 +29,8 @@ export let default_options = {
   offset: ("center" as "0,0" | "center"),
   scale: 1.0,
   // calculus: "meta+codegen",
-  calculus: "prog1static,meta",
+  // calculus: "prog1static,meta",
+  calculus: "meta",
 
   highlight: true,
   showSideConditions: false,

@@ -1,6 +1,8 @@
 import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
+import { expectToken, parseAtom, parseIdent, parseLeftAssoc, parseWhitespace } from '../syntax/parser';
 import { AppDispatchRenderer, AppRenderer, ConstDispatchRenderer } from '../syntax/renderer';
-import { renderer as type_app_renderer } from './type_conversion';
+import { Expr, mkApp, mkConst, mkVar } from '../syntax/syntactic_logic';
+import { parseType, renderer as type_app_renderer } from './type_conversion';
 
 export const calculus: inf_calculus = {
   name: "ExprStaticSemantics",
@@ -95,7 +97,7 @@ export const app_renderer: AppDispatchRenderer<string> = {
   "is_bound": (_, args) => `-2³¹ ≤ ${args[0]} < 2³¹`,
   // "BinOp": (_, args) => `${args[1]} ${args[0]} ${args[2]}`,
   "BinOp": binopRenderer,
-  "UnOp": (_, args) => `${args[0]} ${args[1]}`,
+  // "UnOp": (_, args) => `${args[0]} ${args[1]}`,
   "UnaryOp": (_, args) => `${args[0]} ${args[1]}`, // for completeness
   "Indir": (_, args) => `*${args[0]}`,
   "Addr": (_, args) => `&${args[0]}`,
@@ -126,8 +128,209 @@ export const const_renderer: ConstDispatchRenderer<string> = {
   "Mult": "*",
   "Add": "+",
   "Sub": "-",
-  "And": "∧",
+  // "And": "∧",
+  "And": "&&",
 
+  "Not": "!",
   "Addr": "&",
   "Indir": "*",
+};
+
+
+/*
+
+bool_expr = 
+    arith_expr == arith_expr
+  | arith_expr != arith_expr
+  | arith_expr <= arith_expr
+  | arith_expr <  arith_expr
+  | arith_expr >= arith_expr
+  | arith_expr >  arith_expr
+  | bool_expr  /\ arith_expr // implement via chain
+  | bool_expr  \/ arith_expr
+  | arith_expr
+
+arith_expr = 
+    arith_expr + prod_expr
+  | arith_expr - prod_expr
+  | prod_expr
+
+prod_expr = 
+    prod_expr * factor_expr
+  | prod_expr / factor_expr
+  | factor_expr
+
+factor_expr = 
+    number
+  | var
+  | !factor_expr
+  | -factor_expr
+  | &factor_expr
+  | *factor_expr
+  | (bool_expr)
+
+// expr := expr2 == expr2 | expr2 != expr2 | expr2 < expr2 | expr2 <= expr2 | expr2 > expr2 | expr2 >= expr2 | expr2 + expr2 | expr2 - expr2 | expr2 * expr2 | expr2 / expr2 | expr2 && expr2 | expr2 || expr2 | !expr2 | (expr2) | var | const
+*/
+
+export function parseExpr(s: string): [Expr, string] {
+  return parseBoolExpr(s);
+}
+
+function parseBoolExpr(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+
+  let [expr1, rest] = parseArithExpr(str);
+  str = rest;
+  str = parseWhitespace(str);
+  const binops = [
+    ["==", "Equal"], 
+    ["!=", "UnEqual"], 
+    ["<=", "LessEqual"], 
+    ["<", "Less"], 
+    [">=", "GreaterEqual"], 
+    [">", "Greater"]
+  ];
+  for (let [op, const_name] of binops) {
+    if (str.startsWith(op)) {
+      str = str.slice(op.length);
+      str = parseWhitespace(str);
+      let [expr2, rest2] = parseArithExpr(str);
+      const expr = mkApp(mkConst("BinOp"), [mkConst(const_name), expr1, expr2]);
+      return [expr, rest2];
+    }
+  }
+
+  const chain_ops : [string,string][] = [
+    ["&&", "And"],
+    ["||", "Or"],
+    ["/\\", "And"],
+  ];
+  return parseLeftAssoc(expr1, str, parseArithExpr, chain_ops);
+}
+
+function parseArithExpr(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+
+  const binops : [string,string][] = [
+    ["+", "Plus"], 
+    ["-", "Minus"]
+  ];
+  return parseLeftAssoc(null, str, parseProdExpr, binops);
+}
+
+function parseProdExpr(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+
+  const binops : [string,string][] = [
+    ["*", "Mul"],
+    ["/", "Div"]
+  ];
+  return parseLeftAssoc(null, str, parseFactorExpr, binops);
+}
+
+function parseFactorExpr(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+
+  const unops = [
+    ["!", "Not"],
+    ["-", "Neg"],
+    ["&", "Addr"],
+    ["*", "Indir"]
+  ];
+  for (let [op, const_name] of unops) {
+    if (str.startsWith(op)) {
+      str = str.slice(op.length);
+      str = parseWhitespace(str);
+      let [expr, rest] = parseFactorExpr(str);
+      return [mkApp(mkConst("UnaryOp"), [mkConst(const_name), expr]), rest];
+    }
+  }
+  if (str[0] === "(") {
+    str = str.slice(1);
+    str = parseWhitespace(str);
+    let [expr, rest] = parseBoolExpr(str);
+    str = rest;
+    str = parseWhitespace(str);
+    str = expectToken(str, ")");
+    return [expr, str];
+  }
+
+  // numbers and constants
+  const [ident, rest] = parseIdent(str);
+  // if all digits => Const(ident)
+  if(ident.match(/^\d+$/)) {
+    return [mkApp(mkConst("Const"), [mkConst(ident)]), rest];
+  }
+  return [mkConst(ident), rest];
+}
+
+
+function parseTypedExpr(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+  const [gamma, rest] = parseTypeEnv(str);
+  str = rest;
+  str = parseWhitespace(str);
+  str = expectToken(str, "|-");
+  str = parseWhitespace(str);
+  const [expr, rest2] = parseExpr(str); 
+  str = rest2;
+  str = parseWhitespace(str);
+  str = expectToken(str, ":");
+  str = parseWhitespace(str);
+  const [t, rest3] = parseType(str);
+  str = rest3;
+  return [mkApp(mkConst("typed"), [gamma, expr, t]), str];
+}
+
+function parseTypeEnv(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+  str = expectToken(str, "{");
+  str = parseWhitespace(str);
+
+  let mappings : [Expr, Expr][] = [];
+  while(true) {
+    // ident : type
+    let s_org = str;
+    try {
+      const [ident, rest] = parseAtom(str);
+      str = rest;
+      str = parseWhitespace(str);
+      str = expectToken(str, ":");
+      str = parseWhitespace(str);
+      const [t, rest2] = parseType(str);
+      str = rest2;
+      str = parseWhitespace(str);
+      mappings.push([ident, t]);
+    }
+    catch(e) {
+      str = s_org;
+      break;
+    }
+  }
+
+  str = parseWhitespace(str);
+  str = expectToken(str, "}");
+
+  // transform to Extend(type, name, gamma') 
+  // with innermost being emptyEnv
+  return [
+    mappings.reduceRight<Expr>(
+      (acc, [name, t], _1, _2) => mkApp(mkConst("Extend"), [t, name, acc]), 
+      mkConst("emptyEnv")
+    ), str];
+}
+
+// @ts-ignore
+// window.parseExpr = parseExpr;
+
+
+export const parsers = {
+  "Expression": parseExpr,
+  "Typed Expression": parseTypedExpr,
 };

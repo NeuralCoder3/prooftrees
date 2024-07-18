@@ -1,6 +1,8 @@
 import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
+import { expectToken, parseIdent, parseWhitespace } from '../syntax/parser';
 import { AppDispatchRenderer, AppRenderer, ConstDispatchRenderer, envRenderer, renderNestedList, renderNestedListAdvanced } from '../syntax/renderer';
-import { Expr, equalExpr, fun } from '../syntax/syntactic_logic';
+import { Expr, fun, mkConst } from '../syntax/syntactic_logic';
+import { parseExpr } from './static_semantics_expr';
 
 export const calculus: inf_calculus = {
   name: "StmtStaticSemantics",
@@ -131,4 +133,116 @@ export const const_renderer: ConstDispatchRenderer<string> = {
   "Term": "ε",
   "emptyEnv": "∅",
   "Abort": "abort();",
+};
+
+
+export function parseStmt(s: string): [Expr, string] {
+  let str = s;
+  str = parseWhitespace(str);
+
+  let stmt = null;
+
+  if (str.startsWith("abort")) {
+    str = str.slice("abort".length);
+    str = parseWhitespace(str);
+    str = expectToken(str, "(");
+    str = parseWhitespace(str);
+    str = expectToken(str, ")");
+    str = parseWhitespace(str);
+    str = expectToken(str, ";");
+    stmt = fun("Abort", []);
+  } else if (str.startsWith("if")) {
+    str = str.slice("if".length);
+    str = parseWhitespace(str);
+    str = expectToken(str, "(");
+    str = parseWhitespace(str);
+    const [e, rest] = parseExpr(str);
+    str = parseWhitespace(rest);
+    str = expectToken(str, ")");
+    str = parseWhitespace(str);
+    str = expectToken(str, "{");
+    str = parseWhitespace(str);
+    const [s1, rest1] = parseStmt(str);
+    str = parseWhitespace(rest1);
+    str = expectToken(str, "}");
+    str = parseWhitespace(str);
+    str = expectToken(str, "else");
+    str = parseWhitespace(str);
+    str = expectToken(str, "{");
+    const [s2, rest2] = parseStmt(str);
+    str = rest2;
+    str = parseWhitespace(str);
+    str = expectToken(str, "}");
+    str = parseWhitespace(str);
+    stmt = fun("If", [e, s1, s2]);
+  } else if (str.startsWith("while")) {
+    str = str.slice("while".length);
+    str = parseWhitespace(str);
+    str = expectToken(str, "(");
+    str = parseWhitespace(str);
+    const [e, rest] = parseExpr(str);
+    str = parseWhitespace(rest);
+    str = expectToken(str, ")");
+    str = parseWhitespace(str);
+    const [s, rest1] = parseStmt(str);
+    str = rest1;
+    // str = expectToken(str, "{");
+    // str = parseWhitespace(str);
+    // const [s, rest1] = parseStmt(str);
+    // str = parseWhitespace(rest1);
+    // str = expectToken(str, "}");
+    stmt = fun("While", [e, s]);
+  } else if (str.startsWith("{")) {
+    str = str.slice(1);
+    const [p, rest] = parseProgram(str);
+    str = rest;
+    str = parseWhitespace(str);
+    str = expectToken(str, "}");
+    stmt = fun("Block", [p]);
+  }
+
+  if (stmt !== null) {
+    return [stmt, str];
+  }
+
+  // assign
+  let [ident, rest2] = parseIdent(str);
+  str = rest2;
+  str = parseWhitespace(str);
+  str = expectToken(str, "=");
+  str = parseWhitespace(str);
+  const [e, rest3] = parseExpr(str);
+  str = rest3;
+  str = parseWhitespace(str);
+  str = expectToken(str, ";");
+  stmt = fun("Assign", [mkConst(ident), e]);
+  return [stmt, str];
+  // Decl, Blocks, Seq
+}
+
+export function parseProgram(s:string) : [Expr, string] {
+  let str = s;
+  let stmt_list = []
+  while(true) {
+    let s_org = str;
+    try {
+      str = parseWhitespace(str);
+      const [stmt, rest] = parseStmt(str);
+      stmt_list.push(stmt);
+      str = rest;
+    } catch(e) {
+      str = s_org;
+      break;
+    }
+  }
+  // right associative connection via Seq
+  let prg = 
+    stmt_list.reduceRight<Expr>((acc, stmt) => fun("Seq", [stmt, acc]), mkConst("Term"));
+  return [prg, str];
+}
+
+
+export const parsers = {
+  "Statement": parseStmt,
+  "Program": parseProgram
 };

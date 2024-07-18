@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { Options, calculiList, default_options, normalizationMaps } from './Options';
 import { Calculus, combineCalculus, valuePremise } from '../logic/inference/inference_rules';
-import { parse } from '../logic/syntax/parser';
+import { parse, parseRawExpr, prepareString } from '../logic/syntax/parser';
 import { Expr, Normalizer, Normalizers, getVars, mkApp } from '../logic/syntax/syntactic_logic';
 import './InferenceInterface.css';
 import { AliasTable } from './AliasTable';
@@ -246,6 +246,17 @@ export function InferenceInterface() {
     .registerAppDispatcher(code_gen.app_renderer).registerConstDispatcher(code_gen.const_renderer)
     ;
 
+  const parsers : { [key: string]: (s: string) => [Expr, string] } = {
+    "raw": (s: string) => parseRawExpr(prepareString(s)),
+    ...expr_ty.parsers,
+    ...stmt_ty.parsers,
+    ...hoare.parsers,
+    // ...prog1_static.parsers,
+    // ...code_gen.parsers,
+    ...type_conversion.parsers,
+  };
+  // console.log("Parsers: ", parsers);
+
   const usedRenderer = (withAlias: boolean) => {
     if (options.plainRenderer)
       return plainRenderer;
@@ -285,9 +296,9 @@ export function InferenceInterface() {
   if (options.tree) {
     init_tree = stringTreeToTree(JSON.parse(options.tree) as StringTree);
   } else if (options.goal) {
-    init_tree = goal_tree(valuePremise(parse(options.goal)));
+    init_tree = goal_tree(valuePremise(normalizeExpr(parse(options.goal))));
   } else {
-    init_tree = goal_tree(valuePremise(parse(goal)));
+    init_tree = goal_tree(valuePremise(normalizeExpr(parse(goal))));
   }
 
 
@@ -358,6 +369,113 @@ export function InferenceInterface() {
   });
   // remove duplicates
   const treeVariables = [...new Set(treeVariableList)];
+
+
+  const [goalAnswer, setGoalAnswer] = React.useState(plainRenderer.render(tree.conclusion));
+  const [goalError, setGoalError] = React.useState("");
+  const setGoal = (new_goal: string) => {
+    try {
+      const selected_parser = parsers[goalParser];
+      const [expr_unnorm, rest] = selected_parser(new_goal);
+      const expr = normalizeExpr(expr_unnorm);
+      if (rest !== "") {
+        throw new Error("Expected end of string, got '" + rest + "'");
+      }
+      setTree(goal_tree(valuePremise(expr)));
+      // setTree(goal_tree(valuePremise(parse(new_goal))));
+      return null;
+    } catch (e) {
+      return "Error parsing goal: " + e;
+    }
+  };
+  const [goalParser, setGoalParser] = React.useState("raw");
+  const goalDialog = (
+    // <InputDialog
+    //   open={openGoalDialog}
+    //   setOpen={setOpenGoalDialog}
+    //   title="Change Goal"
+    //   description={"Enter a new goal. Share link for current goal: <a href=\"" + treeLink("goal") + "\">Share Link</a>"}
+    //   defaultValue={plainRenderer.render(tree.conclusion)}
+    //   onConfirm={(new_goal) => {
+    //     try {
+    //       setTree(goal_tree(valuePremise(parse(new_goal))));
+    //       return null;
+    //     } catch (e) {
+    //       return "Error parsing goal: " + e;
+    //     }
+    //   }}
+    //   readonly={false}
+    // />
+    <Dialog open={openGoalDialog} onClose={() => setOpenGoalDialog(false)}
+      maxWidth="lg"
+      fullWidth={true}
+    >
+      <DialogTitle>Change Goal</DialogTitle>
+      <DialogContent>
+        {/* <DialogContentText>{description}</DialogContentText> */}
+        <DialogContentText>
+          Enter a new goal. Share link for current goal: 
+          <a href={treeLink("goal")}>Share Link</a>
+        </DialogContentText>
+        <p>
+          Select Variant:
+          &nbsp;
+          {/* Parsers and raw */}
+          <select
+            value={goalParser}
+            onChange={(e) => {
+              const variant = e.target.value;
+              setGoalParser(variant);
+            }}
+          >
+            {
+              Object.keys(parsers).map((key) => {
+                return (
+                  <option key={key} value={key}>{key}</option>
+                );
+              })
+            }
+          </select>
+        </p>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Text"
+          type="text"
+          fullWidth
+          variant="standard"
+          value={goalAnswer}
+          onChange={(e) => {
+            setGoalAnswer(e.target.value);
+          }}
+          error={goalError !== ""}
+          helperText={goalError}
+          disabled={false}
+          multiline
+          rows={4}
+        />
+      </DialogContent>
+      <DialogActions>
+        {
+          <Button
+            onClick={() => {
+              const error = setGoal(goalAnswer);
+              if (error === null) {
+                setOpenGoalDialog(false);
+              } else {
+                setGoalError(error);
+              }
+            }}
+          >
+            Submit
+          </Button>
+        }
+        <Button onClick={() => setOpenGoalDialog(false)}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+
 
   const instantiationDialog = (
     <Dialog open={openInstantiationDialog} onClose={() => setOpenInstantiationDialog(false)}
@@ -470,22 +588,7 @@ export function InferenceInterface() {
                     >
                       Change Goal
                     </Button>
-                    <InputDialog
-                      open={openGoalDialog}
-                      setOpen={setOpenGoalDialog}
-                      title="Change Goal"
-                      description={"Enter a new goal. Share link for current goal: <a href=\"" + treeLink("goal") + "\">Share Link</a>"}
-                      defaultValue={plainRenderer.render(tree.conclusion)}
-                      onConfirm={(new_goal) => {
-                        try {
-                          setTree(goal_tree(valuePremise(parse(new_goal))));
-                          return null;
-                        } catch (e) {
-                          return "Error parsing goal: " + e;
-                        }
-                      }}
-                      readonly={false}
-                    />
+                    {goalDialog}
 
                     <Button
                       onClick={() => {
