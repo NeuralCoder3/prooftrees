@@ -137,7 +137,8 @@ export function CalculusTable(
       const add_rules = calc.rules.filter((rule) => {
         return !prev.rules.some((prev_rule) => prev_rule.name === rule.name);
       });
-      const new_rules = [...prev.rules, ...add_rules];
+      // const new_rules = [...prev.rules, ...add_rules];
+      const new_rules = [...add_rules, ...prev.rules];
       return { ...prev, rules: new_rules };
     });
   };
