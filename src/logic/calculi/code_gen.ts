@@ -1,6 +1,6 @@
 import { Calculus as inf_calculus, convertStringRule } from '../inference/inference_rules';
 import { AppDispatchRenderer, ConstDispatchRenderer, renderNestedList } from '../syntax/renderer';
-import { App, Expr, Normalizers, mapNormalizer, mkConst } from '../syntax/syntactic_logic';
+import { App, Expr, Normalizers, mapNormalizer, mkApp, mkConst } from '../syntax/syntactic_logic';
 import { app_renderer as expr_app_renderer } from './static_semantics_expr';
 
 // codeR(offsets, registers, expr, type, code)
@@ -180,4 +180,12 @@ export const normalizers: Normalizers = {
       return expr;
     return mkConst("sw");
   },
+  "cons": (expr: Expr): Expr => {
+    const app = expr as App;
+    const args = app.args;
+    // if more than 2 arguments, keep only first and last
+    if (args.length > 2)
+      return mkApp(app.callee, [args[0], args[args.length - 1]]);
+    return expr;
+  }
 };
