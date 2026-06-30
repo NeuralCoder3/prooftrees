@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/prooftrees/static/css/main.99df7b93.css",
-    "main.js": "/prooftrees/static/js/main.1feff9a9.js",
+    "main.js": "/prooftrees/static/js/main.913ce99c.js",
     "static/js/206.2509da79.chunk.js": "/prooftrees/static/js/206.2509da79.chunk.js",
     "index.html": "/prooftrees/index.html"
   },
   "entrypoints": [
     "static/css/main.99df7b93.css",
-    "static/js/main.1feff9a9.js"
+    "static/js/main.913ce99c.js"
   ]
 }
