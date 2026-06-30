@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.css": "/prooftrees/static/css/main.cd27e6b5.css",
-    "main.js": "/prooftrees/static/js/main.7010706c.js",
+    "main.css": "/prooftrees/static/css/main.e8b32b4b.css",
+    "main.js": "/prooftrees/static/js/main.ce21b715.js",
     "static/js/206.2509da79.chunk.js": "/prooftrees/static/js/206.2509da79.chunk.js",
     "index.html": "/prooftrees/index.html"
   },
   "entrypoints": [
-    "static/css/main.cd27e6b5.css",
-    "static/js/main.7010706c.js"
+    "static/css/main.e8b32b4b.css",
+    "static/js/main.ce21b715.js"
   ]
 }
